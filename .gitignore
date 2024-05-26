@@ -30,3 +30,13 @@
 *.exe
 *.out
 *.app
+
+#VS CODE
+.vscode/
+
+#Output files
+.output/
+
+primers/
+tests.cpp
+tests.h
