@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <iostream>
 #include <iterator>
 
 using namespace std::literals;
@@ -120,6 +121,19 @@ namespace transport_catalogue {
                     catalogue.AddBus(std::string(Trim(cmd.id)), ParseRoute(cmd.description));
                 }
             }
+        }
+
+        void ReadFromStream(std::istream& input, TransportCatalogue& catalogue) {
+            int base_request_count;
+            input >> base_request_count >> std::ws;
+
+            transport_catalogue::input::InputReader reader;
+            for (int i = 0; i < base_request_count; ++i) {
+                std::string line;
+                getline(input, line);
+                reader.ParseLine(line);
+            }
+            reader.ApplyCommands(catalogue);
         }
     };
 };

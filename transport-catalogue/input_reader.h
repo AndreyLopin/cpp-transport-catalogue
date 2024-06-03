@@ -34,9 +34,10 @@ namespace transport_catalogue {
              * Наполняет данными транспортный справочник, используя команды из commands_
              */
             void ApplyCommands(TransportCatalogue& catalogue) const;
-
         private:
             std::vector<CommandDescription> commands_;
         };
+
+        void ReadFromStream(std::istream& input, TransportCatalogue& catalogue);
     };
 };
