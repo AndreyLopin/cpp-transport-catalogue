@@ -79,6 +79,21 @@ namespace transport_catalogue {
             return results;
         }
 
+        /**
+         * Разбивает строку на две
+         * Возвращает пару строк, строку с координатами и строку с расстояниями
+        */
+        std::pair<std::string_view, std::string_view> ParseStop(std::string_view str) {
+            auto comma_1 = str.find(',');
+            
+            if(comma_1 == str.npos) {
+                return {};
+            }
+            auto comma_2 = str.find(',');
+
+            return {std::string(str.substr(0, comma_2)), std::string(str.substr(comma_2 + 1))};
+        }
+
         CommandDescription ParseCommandDescription(std::string_view line) {
             auto colon_pos = line.find(':');
             if (colon_pos == line.npos) {
