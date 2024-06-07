@@ -1,9 +1,20 @@
 #include "transport_catalogue.h"
 
 namespace transport_catalogue {
-    void TransportCatalogue::AddStop(const std::string& name, const distance::Coordinates& coordinates) {
-        stops_.push_back(std::move(Stop{name, std::move(coordinates)}));
-        ptr_stops_.emplace(std::string_view(stops_.back().name), &stops_.back());
+    void TransportCatalogue::AddStop(const std::string& name, const distance::Coordinates& coordinates,
+                                    const std::vector<std::pair<std::string_view, double>>& distances) {
+        if (ptr_stops_.find(name) != ptr_stops_.end()) {
+            //ptr_stops_.find(name)->second->coordinates.lat = coordinates.lat;
+            //ptr_stops_.find(name)->second->coordinates.lng = coordinates.lng;
+            ptr_stops_.find(name)->second->coordinates = std::move(coordinates);
+        } else {
+            stops_.push_back(std::move(Stop{name, std::move(coordinates)}));
+            ptr_stops_.emplace(std::string_view(stops_.back().name), &stops_.back());
+        }
+
+        /*for (const auto el : distances) {
+            distances_.emplace({{}, el.second});
+        }*/
     }
 
     const Stop* TransportCatalogue::FindStop(const std::string_view& name) const {

@@ -8,8 +8,6 @@
 using namespace std;
 
 int main() {
-    transport_catalogue::TransportCatalogue catalogue;
-
     TestAddStop();
     return 0;
 }

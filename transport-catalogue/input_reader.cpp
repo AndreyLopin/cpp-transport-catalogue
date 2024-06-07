@@ -83,13 +83,13 @@ namespace transport_catalogue {
          * Разбивает строку на две
          * Возвращает пару строк, строку с координатами и строку с расстояниями
         */
-        std::pair<std::string_view, std::string_view> ParseStop(std::string_view str) {
+        std::pair<std::string_view, std::string_view> ParseStopDescription(std::string_view str) {
             auto comma_1 = str.find(',');
             
             if(comma_1 == str.npos) {
                 return {};
             }
-            auto comma_2 = str.find(',');
+            auto comma_2 = str.find(',', comma_1 + 1);
 
             return {std::string(str.substr(0, comma_2)), std::string(str.substr(comma_2 + 1))};
         }
@@ -122,11 +122,30 @@ namespace transport_catalogue {
             }
         }
 
+        std::vector<std::pair<std::string_view, double>> ParseDistances(std::string_view str) {
+            std::vector<std::pair<std::string_view, double>> result;
+            std::vector<std::string_view> stops = Split(str, ',');
+
+            for (std::string_view s : stops) {
+                auto not_space = s.find_first_not_of(' ');
+                auto delim = s.find('m');
+                auto start_name = s.find('o', delim + 1);
+
+                double distance = std::stod(std::string(s.substr(not_space, delim - not_space)));
+                std::string_view name = Trim(std::string(s.substr(start_name + 1)));
+
+                result.push_back({name, distance});
+            }
+
+            return result;
+        }
+
         void InputReader::ApplyCommands([[maybe_unused]] TransportCatalogue& catalogue) const {
             // Add all stops
             for (CommandDescription cmd : commands_) {
                 if (cmd.command == "Stop"s) {
-                    catalogue.AddStop(std::string(Trim(cmd.id)), ParseCoordinates(cmd.description));
+                    std::pair<std::string_view, std::string_view> stop_description = ParseStopDescription(cmd.description);
+                    catalogue.AddStop(std::string(Trim(cmd.id)), ParseCoordinates(stop_description.first), ParseDistances(stop_description.second));
                 }
             }
 

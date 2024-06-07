@@ -56,7 +56,8 @@ namespace transport_catalogue {
 
     class TransportCatalogue {
     public:
-        void AddStop(const std::string& name, const distance::Coordinates& coordinates);
+        void AddStop(const std::string& name, const distance::Coordinates& coordinates, 
+                    const std::vector<std::pair<std::string_view, double>>& distances);
         const Stop* FindStop(const std::string_view& name) const;
         void AddBus(const std::string& name, const std::vector<std::string_view>& stops);
         const Bus* FindBus(const std::string_view& name) const;
@@ -67,13 +68,13 @@ namespace transport_catalogue {
         double GetBusRouteLength(const std::string_view& name) const;
 
         std::deque<Stop> stops_;
-        std::unordered_map<std::string_view, const Stop*> ptr_stops_;
+        std::unordered_map<std::string_view, Stop*> ptr_stops_;
 
         std::deque<Bus> buses_;
         std::unordered_map<std::string_view, const Bus*> ptr_buses_;
 
         std::unordered_map<std::string_view, std::unordered_set<const Bus*>> buses_for_stop_;
 
-        std::unordered_map<std::pair<Stop*, Stop*>, double> distances_;
+        //std::unordered_map<std::pair<Stop*, Stop*>, double> distances_;
     };
 };
