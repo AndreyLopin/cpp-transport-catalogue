@@ -18,22 +18,23 @@ namespace transport_catalogue {
             StatCommandDescription command = ParseStatCommandDescription(request);
             
             if (command.name == "Bus"s) {
+                output << "Bus "s << command.id;
                 BusInfo bus_info = tansport_catalogue.GetBusInfo(command.id);
                 PrintBusInfo(output, bus_info);
             } else if (command.name == "Stop"s) {
+                output << "Stop "s << command.id;
                 StopInfo stop_info = tansport_catalogue.GetStopInfo(command.id);
                 PrintStopInfo(output, stop_info);
             }
         }
 
         void PrintBusInfo(std::ostream& output, const BusInfo& bus_info) {
-            output << "Bus "s << bus_info.name;
-
             if (!bus_info.name.empty()) {
                 int current_precesion = static_cast<int>(output.precision());          
                 std::setprecision(6);
                 output << ": "s << bus_info.count_all_stops << " stops on route, "s;
-                output << bus_info.count_unique_stops << " unique stops, " << bus_info.route_length << " route length\n";
+                output << bus_info.count_unique_stops << " unique stops, " << bus_info.route_length << " route length, "
+                    << bus_info.route_curvature << " curvature\n";
                 std::setprecision(current_precesion);
             } else {
                 output << ": not found\n"s;
@@ -41,8 +42,6 @@ namespace transport_catalogue {
         }
 
         void PrintStopInfo(std::ostream& output, const StopInfo& stop_info) {
-            output << "Stop "s << stop_info.name;
-
             if (!stop_info.name.empty()) {
                 if (stop_info.buses.empty()) {
                     output << ": no buses\n"s;

@@ -1,23 +1,12 @@
 #include "transport_catalogue.h"
 
 namespace transport_catalogue {
-    void TransportCatalogue::AddStop(const std::string& name, const distance::Coordinates& coordinates,
-                                    const std::vector<std::pair<std::string_view, double>>& distances) {
-        if (ptr_stops_.find(name) != ptr_stops_.end()) {
-            //ptr_stops_.find(name)->second->coordinates.lat = coordinates.lat;
-            //ptr_stops_.find(name)->second->coordinates.lng = coordinates.lng;
-            ptr_stops_.find(name)->second->coordinates = std::move(coordinates);
-        } else {
-            stops_.push_back(std::move(Stop{name, std::move(coordinates)}));
-            ptr_stops_.emplace(std::string_view(stops_.back().name), &stops_.back());
-        }
-
-        /*for (const auto el : distances) {
-            distances_.emplace({{}, el.second});
-        }*/
+    void TransportCatalogue::AddStop(const std::string& name, const distance::Coordinates& coordinates) {
+        stops_.push_back(std::move(Stop{name, std::move(coordinates)}));
+        ptr_stops_.emplace(std::string_view(stops_.back().name), &stops_.back());
     }
 
-    const Stop* TransportCatalogue::FindStop(const std::string_view& name) const {
+    Stop* TransportCatalogue::FindStop(const std::string_view& name) const {
         auto result = ptr_stops_.find(name);
         return result == ptr_stops_.end() ? nullptr : result->second;
     }
@@ -52,7 +41,9 @@ namespace transport_catalogue {
                 unique_stops.insert(stop->name);
             }
             result.count_unique_stops = unique_stops.size();
+            result.geo_length = GetBusGeoLength(name);
             result.route_length = GetBusRouteLength(name);
+            result.route_curvature = result.route_length / result.geo_length;
         }
 
         return result;
@@ -73,7 +64,7 @@ namespace transport_catalogue {
         return result;
     }
 
-    double TransportCatalogue::GetBusRouteLength(const std::string_view& name) const {
+    double TransportCatalogue::GetBusGeoLength(const std::string_view& name) const {
         double route_length = 0.0;
         distance::Coordinates from {-1.0, -1.0}, to {-1.0, -1.0};
         for (const auto stop : ptr_buses_.at(name)->stops) {
@@ -93,5 +84,48 @@ namespace transport_catalogue {
         }
 
         return route_length;
+    }
+
+    double TransportCatalogue::GetBusRouteLength(const std::string_view& name) const {
+        double route_length = 0.0;
+        Stop* from = nullptr;
+        Stop* to = nullptr;
+        for (Stop* stop : ptr_buses_.at(name)->stops) {
+            if (from == nullptr) {
+                from = stop;
+                continue;
+            }
+            if (to == nullptr) {
+                to = stop;
+                route_length += GetDistanceStops(from, to);
+                continue;
+            }
+            
+            from = to;
+            to = stop;
+
+            route_length += GetDistanceStops(from, to);
+        }
+
+        return route_length;
+    }
+
+    void TransportCatalogue::SetDistanceStops(const std::string_view& from, const std::string_view& to, const double& distance) {
+        Stop* ptr_from = FindStop(from);
+        Stop* ptr_to = FindStop(to);
+
+        if (ptr_from != nullptr && ptr_to != nullptr) {
+            distances_.emplace(std::pair<Stop*, Stop*>(ptr_from, ptr_to), distance);
+        }
+    }
+
+    double TransportCatalogue::GetDistanceStops(Stop* from, Stop* to) const {
+        if (distances_.count(std::pair<Stop*, Stop*>(from, to)) > 0) {
+            return distances_.at(std::pair<Stop*, Stop*>(from, to));
+        } else if (distances_.count(std::pair<Stop*, Stop*>(to, from)) > 0) {
+            return distances_.at(std::pair<Stop*, Stop*>(to, from));
+        }
+
+        return 0;
     }
 };

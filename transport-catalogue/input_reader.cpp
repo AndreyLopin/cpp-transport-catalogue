@@ -91,7 +91,7 @@ namespace transport_catalogue {
             }
             auto comma_2 = str.find(',', comma_1 + 1);
 
-            return {std::string(str.substr(0, comma_2)), std::string(str.substr(comma_2 + 1))};
+            return {str.substr(0, comma_2), str.substr(comma_2 + 1)};
         }
 
         CommandDescription ParseCommandDescription(std::string_view line) {
@@ -131,10 +131,14 @@ namespace transport_catalogue {
                 auto delim = s.find('m');
                 auto start_name = s.find('o', delim + 1);
 
-                double distance = std::stod(std::string(s.substr(not_space, delim - not_space)));
-                std::string_view name = Trim(std::string(s.substr(start_name + 1)));
+                if (not_space == s.npos || delim == s.npos || start_name == s.npos) {
+                    return result;
+                }
 
-                result.push_back({name, distance});
+                //double distance = ;
+                //std::string name = );
+
+                result.push_back(std::pair<std::string_view, double>(Trim(s.substr(start_name + 1)), std::stod(std::string(s.substr(not_space, delim - not_space)))));
             }
 
             return result;
@@ -144,8 +148,20 @@ namespace transport_catalogue {
             // Add all stops
             for (CommandDescription cmd : commands_) {
                 if (cmd.command == "Stop"s) {
-                    std::pair<std::string_view, std::string_view> stop_description = ParseStopDescription(cmd.description);
-                    catalogue.AddStop(std::string(Trim(cmd.id)), ParseCoordinates(stop_description.first), ParseDistances(stop_description.second));
+                    std::pair<std::string_view, std::string_view> description = ParseStopDescription(cmd.description);
+                    catalogue.AddStop(std::string(Trim(cmd.id)), ParseCoordinates(description.first));
+                    //std::pair<std::string, std::string> stop_description = ParseStopDescription(cmd.description);
+                    //catalogue.AddStop(std::string(Trim(cmd.id)), ParseCoordinates(stop_description.first), ParseDistances(stop_description.second));
+                }
+            }
+
+            // Add all distances
+            for (CommandDescription cmd : commands_) {
+                if (cmd.command == "Stop"s) {
+                    std::pair<std::string_view, std::string_view> description = ParseStopDescription(cmd.description);
+                    for (const auto& el : ParseDistances(description.second)) {
+                        catalogue.SetDistanceStops(cmd.id, el.first, el.second);
+                    }
                 }
             }
 

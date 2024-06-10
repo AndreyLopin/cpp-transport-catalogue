@@ -3,11 +3,12 @@
 
 #include "input_reader.h"
 #include "stat_reader.h"
-#include "tests.h"
 
 using namespace std;
 
 int main() {
-    TestAddStop();
+    transport_catalogue::TransportCatalogue catalogue;
+    transport_catalogue::input::ReadFromStream(cin, catalogue);
+    transport_catalogue::output::ReadFromStreamAndWriteToStream(catalogue, cin, cout);
     return 0;
 }
