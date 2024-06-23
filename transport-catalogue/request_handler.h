@@ -31,10 +31,10 @@ public:
     }
 
     // Возвращает информацию о маршруте (запрос Bus)
-    std::optional<domain::BusInfo> GetBusInfo(const std::string_view& bus_name) const;
+    std::optional<domain::Bus> GetBusStat(const std::string_view& bus_name) const;
 
     // Возвращает маршруты, проходящие через
-    const std::unordered_set<domain::Bus>* GetBusesByStop(const std::string_view& stop_name) const;
+    //const std::unordered_set<BusPtr>* GetBusesByStop(const std::string_view& stop_name) const;
 
     // Этот метод будет нужен в следующей части итогового проекта
     svg::Document RenderMap() const;

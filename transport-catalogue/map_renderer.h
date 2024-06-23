@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <vector>
 
 #include "svg.h"
@@ -21,6 +22,8 @@ bool IsZero(double value) {
 class SphereProjector {
 public:
     // points_begin и points_end задают начало и конец интервала элементов geo::Coordinates
+    SphereProjector() = default;
+
     template <typename PointInputIt>
     SphereProjector(PointInputIt points_begin, PointInputIt points_end,
                     double max_width, double max_height, double padding)
@@ -107,17 +110,28 @@ struct RenderSettings {
 };
 
 struct RouteSVG {
-    svg::Polyline route_;
+    std::string_view name;
+    geo::Coordinates route_;
     svg::Color color_;
 };
 
 class MapRenderer {
 public:
+    MapRenderer() = default;
+
     MapRenderer(const RenderSettings& settings)
-        : render_settings_(settings) {}
+        : render_settings_(settings) {};
+
+    void AddRoute(const domain::Bus* bus);
+    void SetSettings(const RenderSettings& settings);
+
+    svg::Document RenderMap() const;
+
+    void SetSphereProjector(std::vector<geo::Coordinates>& coordinates);
 private:
     RenderSettings render_settings_;
     std::vector<RouteSVG> routes_;
+    SphereProjector projector_;
 };
 
 }; //map_renderer

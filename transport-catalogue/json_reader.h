@@ -15,7 +15,7 @@ namespace input {
 
 class JsonReader {
 public:
-    JsonReader(TransportCatalogue& catalogue, std::istream& in);
+    JsonReader(TransportCatalogue& catalogue, map_renderer::MapRenderer& renderer, std::istream& in);
     map_renderer::RenderSettings GetRenderSettings(void);
     void ApplyCommands(void) const;
     void AnswersRequests(std::ostream& out) const;
@@ -23,7 +23,7 @@ private:
     void AddStops(void) const;
     void AddDistances(void) const;
     void AddBuses(void) const;
-    svg::Color JsonReader::GetColor(const json::Node& el) const;
+    svg::Color GetColor(const json::Node& el) const;
 
     TransportCatalogue& catalogue_;
     map_renderer::MapRenderer& renderer_;

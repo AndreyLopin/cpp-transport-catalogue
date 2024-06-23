@@ -226,6 +226,7 @@ void JsonReader::AddDistances(void) const {
 
 void JsonReader::AddBuses(void) const {
     // Add all buses
+    std::vector<geo::Coordinates> all_coordinates;
     for(const auto& el : base_requests_) {
         if (el.AsMap().at("type") == "Bus") {
             domain::Bus bus;
@@ -242,9 +243,14 @@ void JsonReader::AddBuses(void) const {
                 }
             }
 
+            for(const auto& stop : bus.stops) {
+                all_coordinates.push_back(stop->coordinates);
+            }
             catalogue_.AddBus(bus);
         }
     }
+
+
 }
 
 }; //namespace input
