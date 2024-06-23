@@ -23,6 +23,12 @@ namespace transport_catalogue {
             std::string description;  // Параметры команды
         };
 
+        struct StopDistances {
+            StopDistances(std::pair<std::string_view, double> distance)
+                : distance_(distance) {}
+            std::pair<std::string_view, double> distance_;
+        };
+
         class InputReader {
         public:
             /**

@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <iostream>
 #include <iterator>
 
@@ -12,7 +13,7 @@ namespace transport_catalogue {
         /**
          * Парсит строку вида "10.123,  -30.1837" и возвращает пару координат (широта, долгота)
          */
-        distance::Coordinates ParseCoordinates(std::string_view str) {
+        geo::Coordinates ParseCoordinates(std::string_view str) {
             static const double nan = std::nan("");
 
             auto not_space = str.find_first_not_of(' ');
@@ -122,8 +123,8 @@ namespace transport_catalogue {
             }
         }
 
-        std::vector<std::pair<std::string_view, double>> ParseDistances(std::string_view str) {
-            std::vector<std::pair<std::string_view, double>> result;
+        std::vector<StopDistances> ParseDistances(std::string_view str) {
+            std::vector<StopDistances> result;
             std::vector<std::string_view> stops = Split(str, ',');
 
             for (std::string_view s : stops) {
@@ -135,10 +136,7 @@ namespace transport_catalogue {
                     return result;
                 }
 
-                //double distance = ;
-                //std::string name = );
-
-                result.push_back(std::pair<std::string_view, double>(Trim(s.substr(start_name + 1)), std::stod(std::string(s.substr(not_space, delim - not_space)))));
+                result.push_back(StopDistances(std::pair<std::string_view, double>(Trim(s.substr(start_name + 1)), std::stod(std::string(s.substr(not_space, delim - not_space))))));
             }
 
             return result;
@@ -150,8 +148,6 @@ namespace transport_catalogue {
                 if (cmd.command == "Stop"s) {
                     std::pair<std::string_view, std::string_view> description = ParseStopDescription(cmd.description);
                     catalogue.AddStop(std::string(Trim(cmd.id)), ParseCoordinates(description.first));
-                    //std::pair<std::string, std::string> stop_description = ParseStopDescription(cmd.description);
-                    //catalogue.AddStop(std::string(Trim(cmd.id)), ParseCoordinates(stop_description.first), ParseDistances(stop_description.second));
                 }
             }
 
@@ -160,7 +156,7 @@ namespace transport_catalogue {
                 if (cmd.command == "Stop"s) {
                     std::pair<std::string_view, std::string_view> description = ParseStopDescription(cmd.description);
                     for (const auto& el : ParseDistances(description.second)) {
-                        catalogue.SetDistanceStops(cmd.id, el.first, el.second);
+                        catalogue.SetDistanceStops(cmd.id, el.distance_.first, el.distance_.second);
                     }
                 }
             }

@@ -19,16 +19,16 @@ namespace transport_catalogue {
             
             if (command.name == "Bus"s) {
                 output << "Bus "s << command.id;
-                BusInfo bus_info = tansport_catalogue.GetBusInfo(command.id);
+                domain::BusInfo bus_info = tansport_catalogue.GetBusInfo(command.id);
                 PrintBusInfo(output, bus_info);
             } else if (command.name == "Stop"s) {
                 output << "Stop "s << command.id;
-                StopInfo stop_info = tansport_catalogue.GetStopInfo(command.id);
+                domain::StopInfo stop_info = tansport_catalogue.GetStopInfo(command.id);
                 PrintStopInfo(output, stop_info);
             }
         }
 
-        void PrintBusInfo(std::ostream& output, const BusInfo& bus_info) {
+        void PrintBusInfo(std::ostream& output, const domain::BusInfo& bus_info) {
             if (!bus_info.name.empty()) {
                 int current_precesion = static_cast<int>(output.precision());          
                 std::setprecision(6);
@@ -41,7 +41,7 @@ namespace transport_catalogue {
             }
         }
 
-        void PrintStopInfo(std::ostream& output, const StopInfo& stop_info) {
+        void PrintStopInfo(std::ostream& output, const domain::StopInfo& stop_info) {
             if (!stop_info.name.empty()) {
                 if (stop_info.buses.empty()) {
                     output << ": no buses\n"s;

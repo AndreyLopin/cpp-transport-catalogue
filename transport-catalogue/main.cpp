@@ -1,14 +1,16 @@
 #include <iostream>
 #include <string>
 
-#include "input_reader.h"
-#include "stat_reader.h"
+#include "json_reader.h"
+#include "map_renderer.h"
 
 using namespace std;
 
 int main() {
     transport_catalogue::TransportCatalogue catalogue;
-    transport_catalogue::input::ReadFromStream(cin, catalogue);
-    transport_catalogue::output::ReadFromStreamAndWriteToStream(catalogue, cin, cout);
+    map_renderer::MapRenderer renderer;
+    transport_catalogue::input::JsonReader reader(catalogue, renderer, cin);
+    reader.ApplyCommands();
+
     return 0;
 }

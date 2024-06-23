@@ -18,8 +18,8 @@ namespace transport_catalogue {
         void ParseAndPrintStat(const TransportCatalogue& tansport_catalogue, std::string_view request,
                             std::ostream& output);
 
-        void PrintBusInfo(std::ostream& output, const BusInfo& bus_info);
-        void PrintStopInfo(std::ostream& output, const StopInfo& stop_info);
+        void PrintBusInfo(std::ostream& output, const domain::BusInfo& bus_info);
+        void PrintStopInfo(std::ostream& output, const domain::StopInfo& stop_info);
 
         void ReadFromStreamAndWriteToStream(const TransportCatalogue& tansport_catalogue,
                                         std::istream& input, std::ostream& output);
