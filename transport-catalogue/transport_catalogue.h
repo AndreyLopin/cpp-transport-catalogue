@@ -25,7 +25,7 @@ namespace transport_catalogue {
         domain::Stop* FindStop(const std::string_view& name) const;
         void AddBus(const std::string& name, const std::vector<std::string_view>& stops);
         void AddBus(const domain::Bus& bus);
-        const domain::Bus* FindBus(const std::string_view& name) const;
+        domain::Bus* FindBus(const std::string_view& name) const;
         domain::BusInfo GetBusInfo(const std::string_view& name) const;
         domain::StopInfo GetStopInfo(const std::string_view& name) const;
 

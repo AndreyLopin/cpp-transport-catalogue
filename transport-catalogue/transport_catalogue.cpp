@@ -34,7 +34,7 @@ namespace transport_catalogue {
         }
     }
 
-    const domain::Bus* TransportCatalogue::FindBus(const std::string_view& name) const {
+    domain::Bus* TransportCatalogue::FindBus(const std::string_view& name) const {
         auto result = ptr_buses_.find(name);
         return result == ptr_buses_.end() ? nullptr : result->second;
     }

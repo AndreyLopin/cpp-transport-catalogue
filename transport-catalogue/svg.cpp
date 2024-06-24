@@ -40,6 +40,11 @@ std::ostream& operator << (std::ostream& out, const StrokeLineJoin& line_join) {
     return out;
 }
 
+std::ostream& operator<< (std::ostream& out, const Color& color) {
+    visit(ColorPrinter{out}, color);
+    return out;
+}
+
 void Object::Render(const RenderContext& context) const {
     context.RenderIndent();
 

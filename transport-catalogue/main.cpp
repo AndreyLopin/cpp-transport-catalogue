@@ -9,8 +9,8 @@ using namespace std;
 int main() {
     transport_catalogue::TransportCatalogue catalogue;
     map_renderer::MapRenderer renderer;
-    transport_catalogue::input::JsonReader reader(catalogue, renderer, cin);
-    reader.ApplyCommands();
+    transport_catalogue::input::JsonReader reader(catalogue, renderer, cin, cout);
+    //reader.ApplyCommands();
 
     return 0;
 }

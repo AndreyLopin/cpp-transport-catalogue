@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <variant>
 #include <vector>
 #include <iostream>
 #include <memory>
@@ -9,13 +10,63 @@
 
 namespace svg {
 
-using Color = std::string;
+struct Rgb {
+    Rgb (uint8_t r = 0, uint8_t g = 0, uint8_t b = 0)
+        : red(r)
+        , green(g)
+        , blue(b) {
+        };
+    
+    uint8_t red;
+    uint8_t green;
+    uint8_t blue;
+};
+
+struct Rgba {
+    Rgba (uint8_t r = 0, uint8_t g = 0, uint8_t b = 0, double a = 1.0)
+        : red(r)
+        , green(g)
+        , blue(b) {
+            if (a >= 0 && a <= 1.0) {
+                opacity = a;
+            } else {
+                opacity = 1.0;
+            }
+        };
+    uint8_t red;
+    uint8_t green;
+    uint8_t blue;
+    double opacity;
+};
+    
+using Color = std::variant<std::monostate, std::string, Rgb, Rgba>;
+inline const Color NoneColor{std::string("none")};
+    
+struct ColorPrinter {
+    std::ostream& out;
+
+    void operator()(std::monostate) const {
+        using namespace std::literals;
+        out << "none"sv;
+    }
+    void operator()(std::string color) const {
+        out << color;
+    }
+    void operator()(Rgb color) {
+        using namespace std::literals;
+        out << "rgb("sv << std::to_string(color.red) << ',' << std::to_string(color.green) << ',' << std::to_string(color.blue) << ')';
+    }
+    void operator()(Rgba color) {
+        using namespace std::literals;
+        out << "rgba("sv << std::to_string(color.red) << ',' << std::to_string(color.green) << ',' << std::to_string(color.blue) << ',' << color.opacity << ')';
+    }
+};
 
 // Объявив в заголовочном файле константу со спецификатором inline,
 // мы сделаем так, что она будет одной на все единицы трансляции,
 // которые подключают этот заголовок.
 // В противном случае каждая единица трансляции будет использовать свою копию этой константы
-inline const Color NoneColor{"none"};
+//inline const Color NoneColor{"none"};
 
 enum class StrokeLineCap {
     BUTT,
@@ -33,6 +84,7 @@ enum class StrokeLineJoin {
 
 std::ostream& operator<< (std::ostream& out, const StrokeLineCap& line_cap);
 std::ostream& operator<< (std::ostream& out, const StrokeLineJoin& line_join);
+std::ostream& operator<< (std::ostream& out, const Color& color);
 
 struct Point {
     Point() = default;
@@ -130,13 +182,13 @@ protected:
             out << " stroke=\""sv << *stroke_color_ << "\""sv;
         }
         if (width_) {
-            out << " width=\""sv << *width_ << "\""sv;
+            out << " stroke-width=\""sv << *width_ << "\""sv;
         }
         if (line_cap_) {
-            out << " line_cap=\""sv << *line_cap_ << "\""sv;
+            out << " stroke-linecap=\""sv << *line_cap_ << "\""sv;
         }
         if (line_join_) {
-            out << " line_join=\""sv << *line_join_ << "\""sv;
+            out << " stroke-linejoin=\""sv << *line_join_ << "\""sv;
         }
     }
 

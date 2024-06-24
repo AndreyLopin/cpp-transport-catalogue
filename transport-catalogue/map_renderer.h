@@ -15,9 +15,6 @@
 namespace map_renderer {
 
 inline const double EPSILON = 1e-6;
-bool IsZero(double value) {
-    return std::abs(value) < EPSILON;
-}
 
 class SphereProjector {
 public:
@@ -82,6 +79,9 @@ public:
     }
 
 private:
+    bool IsZero(double value) {
+        return std::abs(value) < EPSILON;
+    }
     double padding_;
     double min_lon_ = 0;
     double max_lat_ = 0;
@@ -110,8 +110,44 @@ struct RenderSettings {
 };
 
 struct RouteSVG {
-    std::string_view name;
-    geo::Coordinates route_;
+    RouteSVG() = default;
+
+    /*RouteSVG(const RouteSVG& other)
+        : color_(other.color_)
+        , name_(other.name_)
+        , stops_(other.stops_) {
+    };
+
+    RouteSVG(const RouteSVG&& other) {
+        name_ = std::move(other.name_);
+        stops_ = std::move(other.stops_);
+        color_ = std::move(other.color_);
+    }
+
+    RouteSVG& operator=(RouteSVG&& other) {
+        if(&other != this) {
+            name_ = std::move(other.name_);
+            stops_ = std::move(other.stops_);
+            color_ = std::move(other.color_);
+        }
+
+        return *this;
+    }
+
+    void swap(RouteSVG& other) noexcept {
+        std::swap(name_, other.name_);
+        std::swap(color_, other.color_);
+        std::swap(stops_, other.stops_);
+    }
+
+    RouteSVG& operator=(const RouteSVG& other) {
+        RouteSVG copy(other);
+        swap(copy);
+        return *this;
+    }*/
+
+    std::string_view name_;
+    std::vector<geo::Coordinates> stops_;
     svg::Color color_;
 };
 
@@ -122,14 +158,21 @@ public:
     MapRenderer(const RenderSettings& settings)
         : render_settings_(settings) {};
 
-    void AddRoute(const domain::Bus* bus);
+    void AddRoute(domain::Bus* bus);
     void SetSettings(const RenderSettings& settings);
 
-    svg::Document RenderMap() const;
+    svg::Document RenderMap();
 
     void SetSphereProjector(std::vector<geo::Coordinates>& coordinates);
 private:
+    svg::Color NextColor(void) {
+        if(inst_color_ >= render_settings_.color_palette_.size()) {
+            inst_color_ = 0;
+        }
+        return render_settings_.color_palette_[inst_color_++];
+    }
     RenderSettings render_settings_;
+    uint32_t inst_color_ = 0;
     std::vector<RouteSVG> routes_;
     SphereProjector projector_;
 };

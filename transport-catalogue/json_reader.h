@@ -15,7 +15,7 @@ namespace input {
 
 class JsonReader {
 public:
-    JsonReader(TransportCatalogue& catalogue, map_renderer::MapRenderer& renderer, std::istream& in);
+    JsonReader(TransportCatalogue& catalogue, map_renderer::MapRenderer& renderer, std::istream& in, std::ostream& out);
     map_renderer::RenderSettings GetRenderSettings(void);
     void ApplyCommands(void) const;
     void AnswersRequests(std::ostream& out) const;

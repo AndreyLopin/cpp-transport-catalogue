@@ -13,7 +13,7 @@
 namespace transport_catalogue {
 namespace input {
 
-JsonReader::JsonReader(TransportCatalogue& catalogue, map_renderer::MapRenderer& renderer, std::istream& in)
+JsonReader::JsonReader(TransportCatalogue& catalogue, map_renderer::MapRenderer& renderer, std::istream& in, std::ostream& out)
     : catalogue_(catalogue)
     , renderer_(renderer) {
     json::Document doc = json::Load(in);
@@ -22,6 +22,10 @@ JsonReader::JsonReader(TransportCatalogue& catalogue, map_renderer::MapRenderer&
     stat_requests_ = load_dict.at("stat_requests").AsArray();
     render_settings_ = load_dict.at("render_settings").AsMap();
     renderer_.SetSettings(GetRenderSettings());
+    AddStops();
+    AddDistances();
+    AddBuses();
+    renderer_.RenderMap().Render(out);
 }
 
 map_renderer::RenderSettings JsonReader::GetRenderSettings(void) {
@@ -94,9 +98,9 @@ svg::Color JsonReader::GetColor(const json::Node& el) const {
 }
 
 void JsonDownload(TransportCatalogue& catalogue, map_renderer::MapRenderer& renderer, std::istream& in, std::ostream& out) {
-    JsonReader reader = JsonReader(catalogue, renderer, in);
-    reader.ApplyCommands();
-    reader.AnswersRequests(out);
+    JsonReader reader = JsonReader(catalogue, renderer, in, out);
+    //reader.ApplyCommands();
+    //reader.AnswersRequests(out);
 }
 
 void JsonReader::ApplyCommands(void) const {
@@ -247,10 +251,11 @@ void JsonReader::AddBuses(void) const {
                 all_coordinates.push_back(stop->coordinates);
             }
             catalogue_.AddBus(bus);
+            renderer_.AddRoute(catalogue_.FindBus(bus.name));
         }
     }
 
-
+    renderer_.SetSphereProjector(all_coordinates);
 }
 
 }; //namespace input
