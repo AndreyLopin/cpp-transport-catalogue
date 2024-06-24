@@ -97,58 +97,40 @@ struct RenderSettings {
     double line_width_ = 0;
     double stop_radius_ = 0;
 
-    double bus_label_font_size_ = 0.0;
+    int bus_label_font_size_ = 0;
     svg::Point bus_label_offset_ = {0.0, 0.0};
 
-    double stop_label_font_size_ = 0.0;
+    int stop_label_font_size_ = 0;
     svg::Point stop_label_offset_ = {0.0, 0.0};
 
-    svg::Color underlayer_color_;
+    svg::Color underlayer_color_ = svg::Rgb();
     double underlayer_width_ = 0.0;
 
     std::vector<svg::Color> color_palette_;
 };
 
+struct StopSVG {
+    StopSVG() = default;
+
+    std::string_view name_;
+    geo::Coordinates coordinates_;
+public:
+    bool operator<(const StopSVG& other) const {
+        return name_ < other.name_;
+    }
+};
+
+/*bool operator<(const StopSVG& lhs, const StopSVG& rhs) {
+    return lhs.name_ < rhs.name_;
+}*/
+
 struct RouteSVG {
     RouteSVG() = default;
 
-    /*RouteSVG(const RouteSVG& other)
-        : color_(other.color_)
-        , name_(other.name_)
-        , stops_(other.stops_) {
-    };
-
-    RouteSVG(const RouteSVG&& other) {
-        name_ = std::move(other.name_);
-        stops_ = std::move(other.stops_);
-        color_ = std::move(other.color_);
-    }
-
-    RouteSVG& operator=(RouteSVG&& other) {
-        if(&other != this) {
-            name_ = std::move(other.name_);
-            stops_ = std::move(other.stops_);
-            color_ = std::move(other.color_);
-        }
-
-        return *this;
-    }
-
-    void swap(RouteSVG& other) noexcept {
-        std::swap(name_, other.name_);
-        std::swap(color_, other.color_);
-        std::swap(stops_, other.stops_);
-    }
-
-    RouteSVG& operator=(const RouteSVG& other) {
-        RouteSVG copy(other);
-        swap(copy);
-        return *this;
-    }*/
-
     std::string_view name_;
-    std::vector<geo::Coordinates> stops_;
-    svg::Color color_;
+    std::vector<StopSVG> stops_;
+    StopSVG end_stop_;
+    bool is_roundtrip_;
 };
 
 class MapRenderer {
@@ -166,11 +148,26 @@ public:
     void SetSphereProjector(std::vector<geo::Coordinates>& coordinates);
 private:
     svg::Color NextColor(void) {
+        if(render_settings_.color_palette_.size() == 0) {
+            return svg::Rgb();
+        }
         if(inst_color_ >= render_settings_.color_palette_.size()) {
             inst_color_ = 0;
         }
         return render_settings_.color_palette_[inst_color_++];
     }
+
+    svg::Color GetInstColor(void) {
+        return render_settings_.color_palette_[inst_color_];
+    }
+
+    std::vector<svg::Polyline> GetRoutes();
+    std::vector<svg::Text> GetNameRoutes();
+    std::vector<svg::Circle> GetStops(const std::set<StopSVG>& stops);
+    std::vector<svg::Text> GetNameStops(const std::set<StopSVG>& stops);
+
+    std::set<StopSVG> GetStopsSVG();
+
     RenderSettings render_settings_;
     uint32_t inst_color_ = 0;
     std::vector<RouteSVG> routes_;

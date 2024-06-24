@@ -13,12 +13,12 @@ namespace transport_catalogue {
 
     void TransportCatalogue::AddBus(const std::string& name, const std::vector<std::string_view>& stops) {
         domain::Bus bus;
-        bus.name = std::move(name);
+        bus.name_ = std::move(name);
         for (const std::string_view& stop : stops) {
-            bus.stops.push_back(ptr_stops_.find(stop)->second);
+            bus.stops_.push_back(ptr_stops_.find(stop)->second);
         }
         buses_.push_back(std::move(bus));
-        ptr_buses_.emplace(std::string_view(buses_.back().name), &buses_.back());
+        ptr_buses_.emplace(std::string_view(buses_.back().name_), &buses_.back());
 
         for (const std::string_view& stop : stops) {
             buses_for_stop_[ptr_stops_.find(stop)->first].insert(&buses_.back());
@@ -27,9 +27,9 @@ namespace transport_catalogue {
 
     void TransportCatalogue::AddBus(const domain::Bus& bus) {
         buses_.push_back(std::move(bus));
-        ptr_buses_.emplace(std::string_view(buses_.back().name), &buses_.back());
+        ptr_buses_.emplace(std::string_view(buses_.back().name_), &buses_.back());
 
-        for (const auto* stop: buses_.back().stops) {
+        for (const auto* stop: buses_.back().stops_) {
             buses_for_stop_[stop->name].insert(&buses_.back());
         }
     }
@@ -44,9 +44,9 @@ namespace transport_catalogue {
 
         if (ptr_buses_.find(name) != ptr_buses_.end()) {
             result.name = name;
-            result.count_all_stops = ptr_buses_.at(name)->stops.size();
+            result.count_all_stops = ptr_buses_.at(name)->stops_.size();
             std::unordered_set<std::string_view> unique_stops;
-            for (const auto stop : ptr_buses_.at(name)->stops) {
+            for (const auto stop : ptr_buses_.at(name)->stops_) {
                 unique_stops.insert(stop->name);
             }
             result.count_unique_stops = unique_stops.size();
@@ -65,7 +65,7 @@ namespace transport_catalogue {
             result.name = name;
             if (buses_for_stop_.find(ptr_stops_.find(name)->first) != buses_for_stop_.end()) {
                 for (const domain::Bus* bus : buses_for_stop_.find(ptr_stops_.find(name)->first)->second) {
-                    result.buses.insert(std::string_view(bus->name));
+                    result.buses.insert(std::string_view(bus->name_));
                 }
             }
         }
@@ -76,7 +76,7 @@ namespace transport_catalogue {
     double TransportCatalogue::GetBusGeoLength(const std::string_view& name) const {
         double route_length = 0.0;
         geo::Coordinates from {-1.0, -1.0}, to {-1.0, -1.0};
-        for (const auto stop : ptr_buses_.at(name)->stops) {
+        for (const auto stop : ptr_buses_.at(name)->stops_) {
             if (from == geo::Coordinates {-1.0, -1.0}) { 
                 from = stop->coordinates;
                 continue;
@@ -99,7 +99,7 @@ namespace transport_catalogue {
         double route_length = 0.0;
         domain::Stop* from = nullptr;
         domain::Stop* to = nullptr;
-        for (domain::Stop* stop : ptr_buses_.at(name)->stops) {
+        for (domain::Stop* stop : ptr_buses_.at(name)->stops_) {
             if (from == nullptr) {
                 from = stop;
                 continue;

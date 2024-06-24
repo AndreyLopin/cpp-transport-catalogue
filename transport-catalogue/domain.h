@@ -32,11 +32,13 @@ struct Stop {
 };
 
 struct Bus {
-    std::string name;
-    std::vector<Stop*> stops;
+    std::string name_;
+    std::vector<Stop*> stops_;
+    bool is_roundtrip_;
+    Stop* end_stop_;
 
     bool operator==(const Bus& other) const {
-        return stops == other.stops && name == other.name;
+        return stops_ == other.stops_ && name_ == other.name_;
     }
     bool operator!=(const Bus& other) const {
         return !(*this == other);

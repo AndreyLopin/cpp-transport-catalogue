@@ -38,13 +38,13 @@ map_renderer::RenderSettings JsonReader::GetRenderSettings(void) {
     result.line_width_ = render_settings_.at("line_width").AsDouble();
     result.stop_radius_ = render_settings_.at("stop_radius").AsDouble();
 
-    result.bus_label_font_size_ = render_settings_.at("bus_label_font_size").AsDouble();
+    result.bus_label_font_size_ = render_settings_.at("bus_label_font_size").AsInt();
     result.bus_label_offset_ = {
         render_settings_.at("bus_label_offset").AsArray()[0].AsDouble(),
         render_settings_.at("bus_label_offset").AsArray()[1].AsDouble()
     };
 
-    result.stop_label_font_size_ = render_settings_.at("stop_label_font_size").AsDouble();;
+    result.stop_label_font_size_ = render_settings_.at("stop_label_font_size").AsInt();
     result.stop_label_offset_ = {
         render_settings_.at("stop_label_offset").AsArray()[0].AsDouble(),
         render_settings_.at("stop_label_offset").AsArray()[1].AsDouble()
@@ -68,33 +68,33 @@ map_renderer::RenderSettings JsonReader::GetRenderSettings(void) {
 
 svg::Color JsonReader::GetColor(const json::Node& el) const {
     using namespace std::string_literals;
-    std::string color;
+    std::stringstream color;
     if(el.IsString()) {
-        color = el.AsString();
+        color << el.AsString();
     } else if(el.IsArray()) {
         if(el.AsArray().size() == 3) {
-            color = "rgb("s;
+            color << "rgb("s;
         } else {
-            color = "rgba("s;
+            color << "rgba("s;
         }
         
         bool is_not_first = false;
         for(int i = 0; i < 3; i++) {
             if(is_not_first) {
-                color += ","s;
+                color << ","s;
             }
-            color += std::to_string(el.AsArray()[i].AsInt());
+            color << el.AsArray()[i].AsInt();
             is_not_first = true;
         }
 
         if(el.AsArray().size() == 4) {
-            color += ","s;
-            color += std::to_string(el.AsArray()[3].AsDouble());
+            color << ","s;
+            color << el.AsArray()[3].AsDouble();
         }
 
-        color += ")"s;
+        color << ")"s;
     }
-    return color;
+    return color.str();
 }
 
 void JsonDownload(TransportCatalogue& catalogue, map_renderer::MapRenderer& renderer, std::istream& in, std::ostream& out) {
@@ -234,24 +234,28 @@ void JsonReader::AddBuses(void) const {
     for(const auto& el : base_requests_) {
         if (el.AsMap().at("type") == "Bus") {
             domain::Bus bus;
-            bus.name = el.AsMap().at("name").AsString();
+            bus.name_ = el.AsMap().at("name").AsString();
             bool is_roundtrip = el.AsMap().at("is_roundtrip").AsBool();
+            bus.is_roundtrip_ = is_roundtrip;
+            
 
             for(const auto& stop : el.AsMap().at("stops").AsArray()) {
-                bus.stops.push_back(catalogue_.FindStop(stop.AsString()));
+                bus.stops_.push_back(catalogue_.FindStop(stop.AsString()));
             }
+
+            bus.end_stop_ = bus.stops_.back();
 
             if(!is_roundtrip) {
                 for(int i = el.AsMap().at("stops").AsArray().size() - 2; i >= 0; --i) {
-                    bus.stops.push_back(catalogue_.FindStop(el.AsMap().at("stops").AsArray()[i].AsString()));
+                    bus.stops_.push_back(catalogue_.FindStop(el.AsMap().at("stops").AsArray()[i].AsString()));
                 }
             }
 
-            for(const auto& stop : bus.stops) {
+            for(const auto& stop : bus.stops_) {
                 all_coordinates.push_back(stop->coordinates);
             }
             catalogue_.AddBus(bus);
-            renderer_.AddRoute(catalogue_.FindBus(bus.name));
+            renderer_.AddRoute(catalogue_.FindBus(bus.name_));
         }
     }
 
