@@ -18,12 +18,14 @@ public:
     JsonReader(TransportCatalogue& catalogue, map_renderer::MapRenderer& renderer, std::istream& in, std::ostream& out);
     map_renderer::RenderSettings GetRenderSettings(void);
     void ApplyCommands(void) const;
-    void AnswersRequests(std::ostream& out) const;
+    void AnswersRequests(std::ostream& out);
 private:
     void AddStops(void) const;
     void AddDistances(void) const;
     void AddBuses(void) const;
     svg::Color GetColor(const json::Node& el) const;
+
+    json::Node PrintMap(const json::Node& request);
 
     TransportCatalogue& catalogue_;
     map_renderer::MapRenderer& renderer_;
@@ -37,7 +39,7 @@ std::string PrintStopInfo(const domain::StopInfo& stop_info);
 
 json::Document LoadJSON(const std::string& s);
 
-void JsonDownload(TransportCatalogue& catalogue, std::istream& in, std::ostream& out);
+void JsonGetAnswers(std::ostream& out);
 
 }; //namespace input
 }; //namespace transport_catalogue

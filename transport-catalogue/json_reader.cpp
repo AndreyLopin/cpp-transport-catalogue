@@ -25,7 +25,7 @@ JsonReader::JsonReader(TransportCatalogue& catalogue, map_renderer::MapRenderer&
     AddStops();
     AddDistances();
     AddBuses();
-    renderer_.RenderMap().Render(out);
+    AnswersRequests(out);
 }
 
 map_renderer::RenderSettings JsonReader::GetRenderSettings(void) {
@@ -97,22 +97,31 @@ svg::Color JsonReader::GetColor(const json::Node& el) const {
     return color.str();
 }
 
-void JsonDownload(TransportCatalogue& catalogue, map_renderer::MapRenderer& renderer, std::istream& in, std::ostream& out) {
-    JsonReader reader = JsonReader(catalogue, renderer, in, out);
-    //reader.ApplyCommands();
+void JsonGetAnswers(std::ostream& out) {
     //reader.AnswersRequests(out);
 }
 
-void JsonReader::ApplyCommands(void) const {
-    AddStops();
-    AddDistances();
-    AddBuses();
-}
-
-void JsonReader::AnswersRequests(std::ostream& out) const {
-    //json::Array doc;
+void JsonReader::AnswersRequests(std::ostream& out) {
+    json::Array doc;
     std::stringstream output;
-    output << '[';
+
+     for(auto& el : stat_requests_) {
+        if(el.AsMap().at("type").AsString() == "Map") {
+            doc.emplace_back(PrintMap(el));
+        }
+
+        if(el.AsMap().at("type").AsString() == "Bus") {
+            
+        }
+
+        if(el.AsMap().at("type").AsString() == "Stop") {
+
+        }
+     }
+
+     
+    
+    /*output << '[';
     for(auto& el : stat_requests_) {
         if(output.str().size() > 1) {
             output << ',';
@@ -120,6 +129,12 @@ void JsonReader::AnswersRequests(std::ostream& out) const {
         output << '{';
 
         output << "\"request_id\": " << el.AsMap().at("id").AsInt() << '\n';
+
+        if(el.AsMap().at("type").AsString() == "Map") {
+            output << ",\"map\": 5";
+            //renderer_.RenderMap().Render(output);
+            output << "\"";
+        }
 
         if(el.AsMap().at("type").AsString() == "Bus") {
             domain::BusInfo bus = catalogue_.GetBusInfo(el.AsMap().at("name").AsString());
@@ -162,15 +177,26 @@ void JsonReader::AnswersRequests(std::ostream& out) const {
         output << '}';
     }
 
-    output << ']';
+    output << ']';*/
     
-    json::Print(LoadJSON(output.str()), out);
+    json::Print(json::Document(doc), out);
     //out << output.str();
 }
 
 json::Document LoadJSON(const std::string& s) {
     std::istringstream strm(s);
     return json::Load(strm);
+}
+
+json::Node JsonReader::PrintMap(const json::Node& request) {
+    json::Dict answer;
+    std::stringstream output;
+
+    answer.emplace("request_id", json::Node{request.AsMap().at("id").AsInt()});
+    renderer_.RenderMap().Render(output);
+    answer.emplace("map", json::Node{output.str()});
+
+    return json::Node{answer};
 }
 
 /*std::string PrintBusInfo(const domain::BusInfo& bus_info) {
