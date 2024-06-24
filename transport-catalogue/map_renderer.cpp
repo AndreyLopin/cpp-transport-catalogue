@@ -93,7 +93,7 @@ std::vector<svg::Text> MapRenderer::GetNameRoutes() {
         result.push_back(text_underlayer);
         result.push_back(text);
 
-        if(!route.is_roundtrip_) {
+        if(!route.is_roundtrip_ && ((route.stops_[0].name_) != route.end_stop_.name_)) {
             svg::Text text_underlayer_end;
             svg::Text text_end;
             text_underlayer_end.SetPosition(projector_(route.end_stop_.coordinates_))
