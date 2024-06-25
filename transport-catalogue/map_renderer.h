@@ -120,10 +120,6 @@ public:
     }
 };
 
-/*bool operator<(const StopSVG& lhs, const StopSVG& rhs) {
-    return lhs.name_ < rhs.name_;
-}*/
-
 struct RouteSVG {
     RouteSVG() = default;
 

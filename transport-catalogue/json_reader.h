@@ -15,10 +15,25 @@ namespace input {
 
 class JsonReader {
 public:
-    JsonReader(TransportCatalogue& catalogue, map_renderer::MapRenderer& renderer, std::istream& in, std::ostream& out);
+    JsonReader(TransportCatalogue& catalogue, map_renderer::MapRenderer& renderer);
+
     map_renderer::RenderSettings GetRenderSettings(void);
-    void ApplyCommands(void) const;
+
+    void ApplyCommands(void);
+
     void AnswersRequests(std::ostream& out);
+
+    void SetBaseRequest(const json::Array& base_requests) {
+        base_requests_ = base_requests;
+    }
+
+    void SetStatRequest(const json::Array& stat_requests) {
+        stat_requests_ = stat_requests;
+    }
+
+    void SetRenderSettings(const json::Dict& render_settings) {
+        render_settings_ = render_settings;
+    }
 private:
     void AddStops(void) const;
     void AddDistances(void) const;
@@ -26,6 +41,8 @@ private:
     svg::Color GetColor(const json::Node& el) const;
 
     json::Node PrintMap(const json::Node& request);
+    json::Node PrintBusInfo(const json::Node& request);
+    json::Node PrintStopInfo(const json::Node& request);
 
     TransportCatalogue& catalogue_;
     map_renderer::MapRenderer& renderer_;
@@ -34,12 +51,7 @@ private:
     json::Dict render_settings_;
 };
 
-std::string PrintBusInfo(const domain::BusInfo& bus_info);
-std::string PrintStopInfo(const domain::StopInfo& stop_info);
-
-json::Document LoadJSON(const std::string& s);
-
-void JsonGetAnswers(std::ostream& out);
+void LoadJSON(JsonReader& reader, std::istream& in, std::ostream& out);
 
 }; //namespace input
 }; //namespace transport_catalogue

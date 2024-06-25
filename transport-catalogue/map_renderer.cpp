@@ -145,7 +145,7 @@ std::vector<svg::Text> MapRenderer::GetNameStops(const std::set<StopSVG>& stops)
         svg::Text text;
         text_underloader.SetPosition(projector_(stop.coordinates_))
             .SetOffset(render_settings_.stop_label_offset_)
-            .SetFontSize(render_settings_.stop_label_font_size_)
+            .SetFontSize(static_cast<uint32_t>(render_settings_.stop_label_font_size_))
             .SetFontFamily("Verdana")
             .SetData(std::string(stop.name_))
             .SetFillColor(render_settings_.underlayer_color_)
@@ -156,7 +156,7 @@ std::vector<svg::Text> MapRenderer::GetNameStops(const std::set<StopSVG>& stops)
 
         text.SetPosition(projector_(stop.coordinates_))
             .SetOffset(render_settings_.stop_label_offset_)
-            .SetFontSize(render_settings_.stop_label_font_size_)
+            .SetFontSize(static_cast<uint32_t>(render_settings_.stop_label_font_size_))
             .SetFontFamily("Verdana")
             .SetData(std::string(stop.name_))
             .SetFillColor("black");
@@ -192,10 +192,10 @@ svg::Document MapRenderer::RenderMap() {
     std::vector<svg::Circle> stops = GetStops(stops_svg);
     std::vector<svg::Text> name_stops = GetNameStops(stops_svg);
 
-    for(int i = 0; i < static_cast<int>(routes.size()); ++i) {
+    for(uint32_t i = 0; i < static_cast<uint32_t>(routes.size()); ++i) {
         result.Add(routes[i]);
     }
-    for(int i = 0; i < static_cast<int>(name_routes.size()); ++i) {
+    for(uint32_t i = 0; i < static_cast<uint32_t>(name_routes.size()); ++i) {
         result.Add(name_routes[i]);
     }
     for(auto& stop : stops) {

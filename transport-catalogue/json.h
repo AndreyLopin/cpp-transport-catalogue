@@ -24,10 +24,28 @@ class Node {
 public:
    /* Реализуйте Node, используя std::variant */
     Node() : value_(nullptr) {};
-    
 
-    template <typename Type>
-    Node(Type value)
+    Node(const int& value) 
+        : value_(std::move(value)) {
+    }
+
+    Node(const double& value) 
+        : value_(std::move(value)) {
+    }
+
+    Node(const std::string& value) 
+        : value_(std::move(value)) {
+    }
+
+    Node(const bool& value) 
+        : value_(std::move(value)) {
+    }
+
+    Node(const Array& value) 
+        : value_(std::move(value)) {
+    }
+
+    Node(const Dict& value) 
         : value_(std::move(value)) {
     }
 

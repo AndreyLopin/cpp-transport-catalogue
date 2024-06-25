@@ -88,9 +88,9 @@ std::ostream& operator<< (std::ostream& out, const Color& color);
 
 struct Point {
     Point() = default;
-    Point(double x, double y)
-        : x(x)
-        , y(y) {
+    Point(double point_x, double point_y)
+        : x(point_x)
+        , y(point_y) {
     }
     double x = 0;
     double y = 0;
@@ -102,28 +102,28 @@ struct Point {
  */
 struct RenderContext {
     RenderContext(std::ostream& out)
-        : out(out) {
+        : out_(out) {
     }
 
     RenderContext(std::ostream& out, int indent_step, int indent = 0)
-        : out(out)
-        , indent_step(indent_step)
-        , indent(indent) {
+        : out_(out)
+        , indent_step_(indent_step)
+        , indent_(indent) {
     }
 
     RenderContext Indented() const {
-        return {out, indent_step, indent + indent_step};
+        return {out_, indent_step_, indent_ + indent_step_};
     }
 
     void RenderIndent() const {
-        for (int i = 0; i < indent; ++i) {
-            out.put(' ');
+        for (int i = 0; i < indent_; ++i) {
+            out_.put(' ');
         }
     }
 
-    std::ostream& out;
-    int indent_step = 0;
-    int indent = 0;
+    std::ostream& out_;
+    int indent_step_ = 0;
+    int indent_ = 0;
 };
 
 /*

@@ -51,7 +51,7 @@ void Object::Render(const RenderContext& context) const {
     // Делегируем вывод тега своим подклассам
     RenderObject(context);
 
-    context.out << std::endl;
+    context.out_ << std::endl;
 }
 
 // ---------- Circle ------------------
@@ -67,11 +67,11 @@ Circle& Circle::SetRadius(double radius)  {
 }
 
 void Circle::RenderObject(const RenderContext& context) const {
-    auto& out = context.out;
+    auto& out = context.out_;
     out << "<circle cx=\""sv << center_.x << "\" cy=\""sv << center_.y << "\" "sv;
     out << "r=\""sv << radius_ << "\" "sv;
     // Выводим атрибуты, унаследованные от PathProps
-    RenderAttrs(context.out);
+    RenderAttrs(context.out_);
     out << "/>"sv;
 }
 
@@ -82,7 +82,7 @@ Polyline& Polyline::AddPoint(Point point) {
 }
 
 void Polyline::RenderObject(const RenderContext& context) const {
-    auto& out = context.out;
+    auto& out = context.out_;
     out << "<polyline points=\""sv;
     bool is_not_first = false;
     for(const Point& p : points_) {
@@ -94,7 +94,7 @@ void Polyline::RenderObject(const RenderContext& context) const {
     }
     out << '\"';
     // Выводим атрибуты, унаследованные от PathProps
-    RenderAttrs(context.out);
+    RenderAttrs(context.out_);
     out << "/>"sv;
 }
 
@@ -131,7 +131,7 @@ Text& Text::SetData(std::string data) {
 }
 
 void Text::RenderObject(const RenderContext& context) const {
-    auto& out = context.out;
+    auto& out = context.out_;
     out << "<text x=\""sv << pos_.x << "\" y=\""sv << pos_.y;
     out << "\" dx=\""sv << offset_.x << "\" dy=\""sv << offset_.y;
     out << "\" font-size=\""sv << font_size_ << "\" "sv;
@@ -143,7 +143,7 @@ void Text::RenderObject(const RenderContext& context) const {
     }
 
     // Выводим атрибуты, унаследованные от PathProps
-    RenderAttrs(context.out);
+    RenderAttrs(context.out_);
 
     out << '>';
 
