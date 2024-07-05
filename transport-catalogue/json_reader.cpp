@@ -30,15 +30,15 @@ void JsonReader::AnswersRequests(std::ostream& out) {
     std::stringstream output;
 
     for(auto& el : stat_requests_) {
-        if(el.AsMap().at("type").AsString() == "Map") {
+        if(el.AsDict().at("type").AsString() == "Map") {
             doc.emplace_back(PrintMap(el));
         }
 
-        if(el.AsMap().at("type").AsString() == "Bus") {
+        if(el.AsDict().at("type").AsString() == "Bus") {
             doc.emplace_back(PrintBusInfo(el));
         }
 
-        if(el.AsMap().at("type").AsString() == "Stop") {
+        if(el.AsDict().at("type").AsString() == "Stop") {
             doc.emplace_back(PrintStopInfo(el));
         }
     }
@@ -48,10 +48,10 @@ void JsonReader::AnswersRequests(std::ostream& out) {
 
 void LoadJSON(JsonReader& reader, std::istream& in, std::ostream& out) {
     json::Document doc = json::Load(in);
-    const auto load_dict = doc.GetRoot().AsMap();
+    const auto load_dict = doc.GetRoot().AsDict();
     reader.SetBaseRequest(load_dict.at("base_requests").AsArray());
     reader.SetStatRequest(load_dict.at("stat_requests").AsArray());
-    reader.SetRenderSettings(load_dict.at("render_settings").AsMap());
+    reader.SetRenderSettings(load_dict.at("render_settings").AsDict());
     reader.ApplyCommands();
     reader.AnswersRequests(out);
 }
@@ -129,7 +129,7 @@ json::Node JsonReader::PrintMap(const json::Node& request) {
     json::Dict answer;
     std::stringstream output;
 
-    answer.emplace("request_id"s, json::Node{request.AsMap().at("id"s).AsInt()});
+    answer.emplace("request_id"s, json::Node{request.AsDict().at("id"s).AsInt()});
     renderer_.RenderMap().Render(output);
     answer.emplace("map"s, json::Node{output.str()});
 
@@ -140,8 +140,8 @@ json::Node JsonReader::PrintBusInfo(const json::Node& request) {
     using namespace std::string_literals;
     json::Dict answer;
 
-    domain::BusInfo bus = catalogue_.GetBusInfo(request.AsMap().at("name"s).AsString());
-    answer.emplace("request_id"s, json::Node{request.AsMap().at("id"s).AsInt()});
+    domain::BusInfo bus = catalogue_.GetBusInfo(request.AsDict().at("name"s).AsString());
+    answer.emplace("request_id"s, json::Node{request.AsDict().at("id"s).AsInt()});
     if(bus.name.empty()) {
         answer.emplace("error_message"s, json::Node{"not found"s});
     } else {
@@ -157,9 +157,9 @@ json::Node JsonReader::PrintBusInfo(const json::Node& request) {
 json::Node JsonReader::PrintStopInfo(const json::Node& request) {
     using namespace std::string_literals;
     json::Dict answer;
-    domain::StopInfo stop = catalogue_.GetStopInfo(request.AsMap().at("name"s).AsString());
+    domain::StopInfo stop = catalogue_.GetStopInfo(request.AsDict().at("name"s).AsString());
 
-    answer.emplace("request_id"s, json::Node{request.AsMap().at("id"s).AsInt()});
+    answer.emplace("request_id"s, json::Node{request.AsDict().at("id"s).AsInt()});
     if(stop.name.empty()) {
         answer.emplace("error_message"s, json::Node{"not found"s});
     } else {   
@@ -176,8 +176,8 @@ json::Node JsonReader::PrintStopInfo(const json::Node& request) {
 void JsonReader::AddStops(void) const {
     // Add all stops
     for(auto& el : base_requests_) {
-        if (el.AsMap().at("type").AsString() == "Stop") {
-            catalogue_.AddStop(el.AsMap().at("name").AsString(), {el.AsMap().at("latitude").AsDouble(), el.AsMap().at("longitude").AsDouble()});
+        if (el.AsDict().at("type").AsString() == "Stop") {
+            catalogue_.AddStop(el.AsDict().at("name").AsString(), {el.AsDict().at("latitude").AsDouble(), el.AsDict().at("longitude").AsDouble()});
         }
     }
 }
@@ -185,9 +185,9 @@ void JsonReader::AddStops(void) const {
 void JsonReader::AddDistances(void) const {
     // Add all distances
     for(const auto& el : base_requests_) {
-        if (el.AsMap().at("type").AsString() == "Stop") {
-            for(const auto& [key, value] : el.AsMap().at("road_distances").AsMap()) {                
-                catalogue_.SetDistanceStops(catalogue_.FindStop(el.AsMap().at("name").AsString()), catalogue_.FindStop(key), value.AsDouble());
+        if (el.AsDict().at("type").AsString() == "Stop") {
+            for(const auto& [key, value] : el.AsDict().at("road_distances").AsDict()) {                
+                catalogue_.SetDistanceStops(catalogue_.FindStop(el.AsDict().at("name").AsString()), catalogue_.FindStop(key), value.AsDouble());
             }
         }
     }
@@ -197,22 +197,22 @@ void JsonReader::AddBuses(void) const {
     // Add all buses
     std::vector<geo::Coordinates> all_coordinates;
     for(const auto& el : base_requests_) {
-        if (el.AsMap().at("type").AsString() == "Bus") {
+        if (el.AsDict().at("type").AsString() == "Bus") {
             domain::Bus bus;
-            bus.name_ = el.AsMap().at("name").AsString();
-            bool is_roundtrip = el.AsMap().at("is_roundtrip").AsBool();
+            bus.name_ = el.AsDict().at("name").AsString();
+            bool is_roundtrip = el.AsDict().at("is_roundtrip").AsBool();
             bus.is_roundtrip_ = is_roundtrip;
             
 
-            for(const auto& stop : el.AsMap().at("stops").AsArray()) {
+            for(const auto& stop : el.AsDict().at("stops").AsArray()) {
                 bus.stops_.push_back(catalogue_.FindStop(stop.AsString()));
             }
 
             bus.end_stop_ = bus.stops_.back();
 
             if(!is_roundtrip) {
-                for(int i = static_cast<int>(el.AsMap().at("stops").AsArray().size()) - 2; i >= 0; --i) {
-                    bus.stops_.push_back(catalogue_.FindStop(el.AsMap().at("stops").AsArray()[static_cast<uint32_t>(i)].AsString()));
+                for(int i = static_cast<int>(el.AsDict().at("stops").AsArray().size()) - 2; i >= 0; --i) {
+                    bus.stops_.push_back(catalogue_.FindStop(el.AsDict().at("stops").AsArray()[static_cast<uint32_t>(i)].AsString()));
                 }
             }
 
