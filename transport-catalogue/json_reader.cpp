@@ -5,6 +5,8 @@
 #include <sstream>
 #include <string>
 
+#include "json_builder.h"
+
 /*
  * Здесь можно разместить код наполнения транспортного справочника данными из JSON,
  * а также код обработки запросов к базе и формирование массива ответов в формате JSON
@@ -129,19 +131,20 @@ json::Node JsonReader::PrintMap(const json::Node& request) {
     json::Dict answer;
     std::stringstream output;
 
-    answer.emplace("request_id"s, json::Node{request.AsDict().at("id"s).AsInt()});
+    /*answer.emplace("request_id"s, json::Node{request.AsDict().at("id"s).AsInt()});
     renderer_.RenderMap().Render(output);
-    answer.emplace("map"s, json::Node{output.str()});
+    answer.emplace("map"s, json::Node{output.str()});*/
 
     return json::Node{answer};
 }
 
 json::Node JsonReader::PrintBusInfo(const json::Node& request) {
     using namespace std::string_literals;
-    json::Dict answer;
-
+    //json::Dict answer;
+    json::Builder answer = json::Builder{};
     domain::BusInfo bus = catalogue_.GetBusInfo(request.AsDict().at("name"s).AsString());
-    answer.emplace("request_id"s, json::Node{request.AsDict().at("id"s).AsInt()});
+
+    /*answer.emplace("request_id"s, json::Node{request.AsDict().at("id"s).AsInt()});
     if(bus.name.empty()) {
         answer.emplace("error_message"s, json::Node{"not found"s});
     } else {
@@ -149,9 +152,14 @@ json::Node JsonReader::PrintBusInfo(const json::Node& request) {
         answer.emplace("route_length"s, json::Node{bus.route_length});
         answer.emplace("stop_count"s, json::Node{static_cast<int>(bus.count_all_stops)});
         answer.emplace("unique_stop_count"s, json::Node{static_cast<int>(bus.count_unique_stops)});
-    }
+    }*/
 
-    return json::Node{answer};
+   answer.StartDict().Key("request_id"s).Value(request.AsDict().at("id"s).AsInt());
+   if(bus.name.empty()) {
+   } else {
+   }
+
+    return answer.Build();
 }
 
 json::Node JsonReader::PrintStopInfo(const json::Node& request) {
@@ -159,7 +167,7 @@ json::Node JsonReader::PrintStopInfo(const json::Node& request) {
     json::Dict answer;
     domain::StopInfo stop = catalogue_.GetStopInfo(request.AsDict().at("name"s).AsString());
 
-    answer.emplace("request_id"s, json::Node{request.AsDict().at("id"s).AsInt()});
+    /*answer.emplace("request_id"s, json::Node{request.AsDict().at("id"s).AsInt()});
     if(stop.name.empty()) {
         answer.emplace("error_message"s, json::Node{"not found"s});
     } else {   
@@ -168,7 +176,7 @@ json::Node JsonReader::PrintStopInfo(const json::Node& request) {
             buses.push_back(json::Node{std::string(bus)});
         }
         answer.emplace("buses"s, json::Node{buses});
-    }
+    }*/
 
     return json::Node{answer};
 }
