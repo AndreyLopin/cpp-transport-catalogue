@@ -10,7 +10,6 @@ namespace json {
 class Builder {
     class BaseContext;
     class KeyItemContext;
-    class ValueItemContext;
     class ArrayItemContext;
     class DictItemContext;
 public:
@@ -100,17 +99,6 @@ private:
         }
         Builder& EndArray() = delete;
         Builder& EndDict() = delete;
-        Node Build() = delete;
-    };
-
-    class ValueItemContext : public BaseContext {
-    public:
-        ValueItemContext(Builder& builder) : BaseContext(builder) {}
-        Builder& Value(Node::Value value) = delete;
-        ArrayItemContext StartArray() = delete;
-        DictItemContext StartDict() = delete;
-        Builder& EndArray() = delete;
-        //Builder& EndDict() = delete;
         Node Build() = delete;
     };
 
