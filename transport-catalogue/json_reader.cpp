@@ -128,57 +128,52 @@ json::Document LoadJSON(const std::string& s) {
 
 json::Node JsonReader::PrintMap(const json::Node& request) {
     using namespace std::string_literals;
-    json::Dict answer;
     std::stringstream output;
 
-    /*answer.emplace("request_id"s, json::Node{request.AsDict().at("id"s).AsInt()});
     renderer_.RenderMap().Render(output);
-    answer.emplace("map"s, json::Node{output.str()});*/
-
-    return json::Node{answer};
+    return  json::Builder{}.StartDict()
+                    .Key("request_id"s)
+                    .Value(request.AsDict().at("id"s).AsInt())
+                    .Key("map"s).Value(output.str())
+                    .EndDict()
+                    .Build();
 }
 
 json::Node JsonReader::PrintBusInfo(const json::Node& request) {
     using namespace std::string_literals;
-    //json::Dict answer;
-    json::Builder answer = json::Builder{};
     domain::BusInfo bus = catalogue_.GetBusInfo(request.AsDict().at("name"s).AsString());
-
-    /*answer.emplace("request_id"s, json::Node{request.AsDict().at("id"s).AsInt()});
+    
+    json::Builder answer = json::Builder{};
+    answer.StartDict().Key("request_id"s).Value(request.AsDict().at("id"s).AsInt());
     if(bus.name.empty()) {
-        answer.emplace("error_message"s, json::Node{"not found"s});
+        answer.Key("error_message"s).Value("not found"s);
     } else {
-        answer.emplace("curvature"s, json::Node{bus.route_curvature});
-        answer.emplace("route_length"s, json::Node{bus.route_length});
-        answer.emplace("stop_count"s, json::Node{static_cast<int>(bus.count_all_stops)});
-        answer.emplace("unique_stop_count"s, json::Node{static_cast<int>(bus.count_unique_stops)});
-    }*/
+        answer.Key("curvature"s).Value(bus.route_curvature);
+        answer.Key("route_length"s).Value(bus.route_length);
+        answer.Key("stop_count"s).Value(static_cast<int>(bus.count_all_stops));
+        answer.Key("unique_stop_count"s).Value(static_cast<int>(bus.count_unique_stops));
+    }
 
-   answer.StartDict().Key("request_id"s).Value(request.AsDict().at("id"s).AsInt());
-   if(bus.name.empty()) {
-   } else {
-   }
-
-    return answer.Build();
+    return answer.EndDict().Build();
 }
 
 json::Node JsonReader::PrintStopInfo(const json::Node& request) {
     using namespace std::string_literals;
-    json::Dict answer;
     domain::StopInfo stop = catalogue_.GetStopInfo(request.AsDict().at("name"s).AsString());
 
-    /*answer.emplace("request_id"s, json::Node{request.AsDict().at("id"s).AsInt()});
+    json::Builder answer = json::Builder{};
+    answer.StartDict().Key("request_id"s).Value(request.AsDict().at("id"s).AsInt());
     if(stop.name.empty()) {
-        answer.emplace("error_message"s, json::Node{"not found"s});
-    } else {   
-        json::Array buses;
+        answer.Key("error_message"s).Value("not found"s);
+    } else {
+        answer.Key("buses"s).StartArray();
         for(const auto bus : stop.buses) {
-            buses.push_back(json::Node{std::string(bus)});
+            answer.Value(std::string(bus));
         }
-        answer.emplace("buses"s, json::Node{buses});
-    }*/
-
-    return json::Node{answer};
+        answer.EndArray();
+    }
+    
+    return answer.EndDict().Build();
 }
 
 void JsonReader::AddStops(void) const {
