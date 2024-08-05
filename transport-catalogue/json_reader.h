@@ -34,6 +34,10 @@ public:
     void SetRenderSettings(const json::Dict& render_settings) {
         render_settings_ = render_settings;
     }
+
+    void SetRoutingSettings(const json::Dict& routing_settings) {
+        routing_settings_ = routing_settings;
+    }
 private:
     void AddStops(void) const;
     void AddDistances(void) const;
@@ -49,6 +53,7 @@ private:
     json::Array base_requests_;
     json::Array stat_requests_;
     json::Dict render_settings_;
+    json::Dict routing_settings_;
 };
 
 void LoadJSON(JsonReader& reader, std::istream& in, std::ostream& out);

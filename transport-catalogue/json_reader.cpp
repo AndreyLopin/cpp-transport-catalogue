@@ -54,6 +54,7 @@ void LoadJSON(JsonReader& reader, std::istream& in, std::ostream& out) {
     reader.SetBaseRequest(load_dict.at("base_requests").AsArray());
     reader.SetStatRequest(load_dict.at("stat_requests").AsArray());
     reader.SetRenderSettings(load_dict.at("render_settings").AsDict());
+    reader.SetRoutingSettings(load_dict.at("routing_settings").AsDict());
     reader.ApplyCommands();
     reader.AnswersRequests(out);
 }
