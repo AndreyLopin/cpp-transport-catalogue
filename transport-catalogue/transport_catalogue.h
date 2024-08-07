@@ -33,6 +33,10 @@ namespace transport_catalogue {
         void SetDistanceStops(domain::Stop* from, domain::Stop* to, const double& distance);
         double GetDistanceStops(domain::Stop* from, domain::Stop* to) const;
 
+        size_t GetStopsCount() const {
+            return stops_.size();
+        }
+
     private:
         double GetBusGeoLength(const std::string_view& name) const;
         double GetBusRouteLength(const std::string_view& name) const;

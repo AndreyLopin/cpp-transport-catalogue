@@ -9,15 +9,18 @@
 #include "transport_catalogue.h"
 #include "map_renderer.h"
 #include "request_handler.h"
+#include "transport_router.h"
 
 namespace transport_catalogue {
 namespace input {
 
 class JsonReader {
 public:
-    JsonReader(TransportCatalogue& catalogue, map_renderer::MapRenderer& renderer);
+    JsonReader(TransportCatalogue& catalogue, map_renderer::MapRenderer& renderer, transport_router::Router& router);
 
     map_renderer::RenderSettings GetRenderSettings(void);
+
+    transport_router::RoutingSettings GetRoutingSettings(void);
 
     void ApplyCommands(void);
 
@@ -47,9 +50,12 @@ private:
     json::Node PrintMap(const json::Node& request);
     json::Node PrintBusInfo(const json::Node& request);
     json::Node PrintStopInfo(const json::Node& request);
+    json::Node PrintRoute(const json::Node& request);
 
     TransportCatalogue& catalogue_;
     map_renderer::MapRenderer& renderer_;
+    transport_router::Router& router_;
+
     json::Array base_requests_;
     json::Array stat_requests_;
     json::Dict render_settings_;

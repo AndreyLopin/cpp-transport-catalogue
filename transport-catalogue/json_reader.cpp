@@ -15,13 +15,16 @@
 namespace transport_catalogue {
 namespace input {
 
-JsonReader::JsonReader(TransportCatalogue& catalogue, map_renderer::MapRenderer& renderer)
+JsonReader::JsonReader(TransportCatalogue& catalogue, map_renderer::MapRenderer& renderer, 
+        transport_router::Router& router)
     : catalogue_(catalogue)
-    , renderer_(renderer) {
+    , renderer_(renderer)
+    , router_(router) {
 }
 
 void JsonReader::ApplyCommands(void) {
     renderer_.SetSettings(GetRenderSettings());
+    router_.SetSettings(GetRoutingSettings());
     AddStops();
     AddDistances();
     AddBuses();
@@ -30,6 +33,8 @@ void JsonReader::ApplyCommands(void) {
 void JsonReader::AnswersRequests(std::ostream& out) {
     json::Array doc;
     std::stringstream output;
+
+    graph::DirectedWeightedGraph<double> transport_graph(catalogue_.GetStopsCount());
 
     for(auto& el : stat_requests_) {
         if(el.AsDict().at("type").AsString() == "Map") {
@@ -42,6 +47,10 @@ void JsonReader::AnswersRequests(std::ostream& out) {
 
         if(el.AsDict().at("type").AsString() == "Stop") {
             doc.emplace_back(PrintStopInfo(el));
+        }
+
+        if(el.AsDict().at("type").AsString() == "Route") {
+            doc.emplace_back();
         }
     }
     
@@ -91,6 +100,15 @@ map_renderer::RenderSettings JsonReader::GetRenderSettings(void) {
     return result;
 }
 
+transport_router::RoutingSettings JsonReader::GetRoutingSettings(void) {
+    transport_router::RoutingSettings result;
+
+    result.bus_wait_time = routing_settings_.at("bus_wait_time").AsInt();
+    result.bus_velocity = routing_settings_.at("bus_velocity").AsDouble();
+
+    return result;
+}
+
 svg::Color JsonReader::GetColor(const json::Node& el) const {
     using namespace std::string_literals;
     std::stringstream color;
@@ -136,6 +154,21 @@ json::Node JsonReader::PrintMap(const json::Node& request) {
                     .Key("request_id"s)
                     .Value(request.AsDict().at("id"s).AsInt())
                     .Key("map"s).Value(output.str())
+                    .EndDict()
+                    .Build();
+}
+
+json::Node JsonReader::PrintRoute(const json::Node& request) {
+    using namespace std::string_literals;
+    std::stringstream output;
+
+    std::string from, to;
+    from = request.AsDict().at("from").AsString();
+    to = request.AsDict().at("to").AsString();
+
+    //router_.BuildRoute().Build(output);
+    return json::Builder{}.StartDict()
+                    .Key("request_id"s).Value(request.AsDict().at("id"s).AsInt())
                     .EndDict()
                     .Build();
 }
