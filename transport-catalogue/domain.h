@@ -20,6 +20,7 @@
 namespace domain {
 
 struct Stop {
+    size_t id;
     std::string name;
     geo::Coordinates coordinates;
 

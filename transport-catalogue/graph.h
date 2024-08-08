@@ -14,7 +14,19 @@ template <typename Weight>
 struct Edge {
     VertexId from;
     VertexId to;
+    size_t span_count;
+    std::string bus;
     Weight weight;
+
+    Edge() = default;
+
+    Edge(VertexId from_, VertexId to_, size_t span_count_, std::string bus_, Weight weight_)
+        : from(from_)
+        , to(to_)
+        , span_count(span_count_)
+        , bus(bus_)
+        , weight(weight_) {
+    };
 };
 
 template <typename Weight>

@@ -2,7 +2,7 @@
 
 namespace transport_catalogue {
     void TransportCatalogue::AddStop(const std::string& name, const geo::Coordinates& coordinates) {
-        stops_.push_back(std::move(domain::Stop{name, std::move(coordinates)}));
+        stops_.push_back(std::move(domain::Stop{stops_.size(), name, std::move(coordinates)}));
         ptr_stops_.emplace(std::string_view(stops_.back().name), &stops_.back());
     }
 
@@ -71,6 +71,10 @@ namespace transport_catalogue {
         }
 
         return result;
+    }
+
+    std::deque<domain::Bus> TransportCatalogue::GetBuses() const {
+        return buses_;
     }
 
     double TransportCatalogue::GetBusGeoLength(const std::string_view& name) const {
@@ -142,5 +146,9 @@ namespace transport_catalogue {
         }
 
         return 0;
+    }
+
+    std::unordered_map<std::pair<domain::Stop*, domain::Stop*>, double, DistanceHasher> TransportCatalogue::GetDistances() {
+        return distances_;
     }
 };

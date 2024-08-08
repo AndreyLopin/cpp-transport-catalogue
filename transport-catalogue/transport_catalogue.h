@@ -29,6 +29,8 @@ namespace transport_catalogue {
         domain::BusInfo GetBusInfo(const std::string_view& name) const;
         domain::StopInfo GetStopInfo(const std::string_view& name) const;
 
+        std::deque<domain::Bus> GetBuses() const;
+
         void SetDistanceStops(const std::string_view& from, const std::string_view& to, const double& distance);
         void SetDistanceStops(domain::Stop* from, domain::Stop* to, const double& distance);
         double GetDistanceStops(domain::Stop* from, domain::Stop* to) const;
@@ -36,6 +38,8 @@ namespace transport_catalogue {
         size_t GetStopsCount() const {
             return stops_.size();
         }
+
+        std::unordered_map<std::pair<domain::Stop*, domain::Stop*>, double, DistanceHasher> GetDistances();
 
     private:
         double GetBusGeoLength(const std::string_view& name) const;

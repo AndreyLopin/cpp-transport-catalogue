@@ -34,7 +34,9 @@ void JsonReader::AnswersRequests(std::ostream& out) {
     json::Array doc;
     std::stringstream output;
 
-    graph::DirectedWeightedGraph<double> transport_graph(catalogue_.GetStopsCount());
+    graph::DirectedWeightedGraph<double> transport_graph(catalogue_.GetStopsCount());    
+    router_.FillGraphs(catalogue_, transport_graph);
+    graph::Router transport_router(transport_graph);
 
     for(auto& el : stat_requests_) {
         if(el.AsDict().at("type").AsString() == "Map") {
@@ -50,7 +52,7 @@ void JsonReader::AnswersRequests(std::ostream& out) {
         }
 
         if(el.AsDict().at("type").AsString() == "Route") {
-            doc.emplace_back();
+            doc.emplace_back(PrintRoute(el));
         }
     }
     
@@ -207,6 +209,14 @@ json::Node JsonReader::PrintStopInfo(const json::Node& request) {
         answer.EndArray();
     }
     
+    return answer.EndDict().Build();
+}
+
+json::Node JsonReader::PrintRoute(const json::Node& request) {
+    using namespace std::string_literals;
+
+    json::Builder answer = json::Builder{};
+    answer.StartDict();
     return answer.EndDict().Build();
 }
 
