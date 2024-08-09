@@ -29,6 +29,9 @@ public:
 
     std::optional<RouteInfo> BuildRoute(VertexId from, VertexId to) const;
 
+    const Graph& GetGraph() const {
+        return graph_;
+    }
 private:
     struct RouteInternalData {
         Weight weight;

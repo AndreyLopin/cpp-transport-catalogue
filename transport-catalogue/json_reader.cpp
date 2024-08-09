@@ -34,7 +34,7 @@ void JsonReader::AnswersRequests(std::ostream& out) {
     json::Array doc;
     std::stringstream output;
 
-    graph::DirectedWeightedGraph<double> transport_graph(catalogue_.GetStopsCount());    
+    graph::DirectedWeightedGraph<double> transport_graph(catalogue_.GetStopsCount());
     router_.FillGraphs(catalogue_, transport_graph);
     graph::Router transport_router(transport_graph);
 
@@ -52,7 +52,7 @@ void JsonReader::AnswersRequests(std::ostream& out) {
         }
 
         if(el.AsDict().at("type").AsString() == "Route") {
-            doc.emplace_back(PrintRoute(el));
+            doc.emplace_back(PrintRoute(el, transport_router));
         }
     }
     
@@ -160,21 +160,6 @@ json::Node JsonReader::PrintMap(const json::Node& request) {
                     .Build();
 }
 
-json::Node JsonReader::PrintRoute(const json::Node& request) {
-    using namespace std::string_literals;
-    std::stringstream output;
-
-    std::string from, to;
-    from = request.AsDict().at("from").AsString();
-    to = request.AsDict().at("to").AsString();
-
-    //router_.BuildRoute().Build(output);
-    return json::Builder{}.StartDict()
-                    .Key("request_id"s).Value(request.AsDict().at("id"s).AsInt())
-                    .EndDict()
-                    .Build();
-}
-
 json::Node JsonReader::PrintBusInfo(const json::Node& request) {
     using namespace std::string_literals;
     domain::BusInfo bus = catalogue_.GetBusInfo(request.AsDict().at("name"s).AsString());
@@ -212,11 +197,50 @@ json::Node JsonReader::PrintStopInfo(const json::Node& request) {
     return answer.EndDict().Build();
 }
 
-json::Node JsonReader::PrintRoute(const json::Node& request) {
+json::Node JsonReader::PrintRoute(const json::Node& request, graph::Router<double> transport_router) {
     using namespace std::string_literals;
 
     json::Builder answer = json::Builder{};
     answer.StartDict();
+
+    domain::Stop* from = catalogue_.FindStop(request.AsDict().at("from").AsString());
+    domain::Stop* to = catalogue_.FindStop(request.AsDict().at("to").AsString());
+
+    if (from == to) {
+        answer.Key("total_time"s).Value(0)
+            .Key("request_id"s).Value(request.AsDict().at("id").AsInt())
+            .Key("items"s)
+            .StartArray()
+            .EndArray();
+    } else {
+        const auto route = transport_router.graph::Router<double>::BuildRoute(from->id, to->id);
+        
+        if (route.has_value()) {
+            const auto& elem = route.value().edges;
+            json::Array items;
+            for (const auto& el : elem) {
+                const auto& edge = transport_router.GetGraph().GetEdge(el);
+                items.push_back(json::Builder().StartDict()
+                    .Key("time").Value(router_.GetBusWaitTime())
+                    .Key("type").Value("Wait")
+                    .Key("stop_name").Value(catalogue_.GetAllStops()[edge.from].name)
+                    .EndDict().Build());
+                items.push_back(json::Builder().StartDict()
+                    .Key("time"s).Value(edge.weight - router_.GetBusWaitTime())
+                    .Key("span_count"s).Value(static_cast<int>(edge.span_count))
+                    .Key("bus"s).Value(edge.bus)
+                    .Key("type"s).Value("Bus"s)
+                    .EndDict().Build());
+            }
+            answer.Key("total_time"s).Value(route.value().weight)
+                .Key("request_id"s).Value(request.AsDict().at("id").AsInt())
+                .Key("items"s).Value(items);
+        } else {
+            answer.Key("request_id"s).Value(request.AsDict().at("id").AsInt())
+                .Key("error_message").Value("not found"s);
+        }
+    }
+
     return answer.EndDict().Build();
 }
 

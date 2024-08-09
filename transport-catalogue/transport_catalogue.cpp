@@ -151,4 +151,6 @@ namespace transport_catalogue {
     std::unordered_map<std::pair<domain::Stop*, domain::Stop*>, double, DistanceHasher> TransportCatalogue::GetDistances() {
         return distances_;
     }
+
+    
 };

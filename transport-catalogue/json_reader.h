@@ -50,7 +50,7 @@ private:
     json::Node PrintMap(const json::Node& request);
     json::Node PrintBusInfo(const json::Node& request);
     json::Node PrintStopInfo(const json::Node& request);
-    json::Node PrintRoute(const json::Node& request);
+    json::Node PrintRoute(const json::Node& request, graph::Router<double> transport_router);
 
     TransportCatalogue& catalogue_;
     map_renderer::MapRenderer& renderer_;

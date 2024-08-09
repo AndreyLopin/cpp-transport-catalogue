@@ -41,6 +41,10 @@ namespace transport_catalogue {
 
         std::unordered_map<std::pair<domain::Stop*, domain::Stop*>, double, DistanceHasher> GetDistances();
 
+        std::deque<domain::Stop> GetAllStops() const {
+            return stops_;
+        }
+
     private:
         double GetBusGeoLength(const std::string_view& name) const;
         double GetBusRouteLength(const std::string_view& name) const;
