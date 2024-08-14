@@ -10,14 +10,23 @@ struct RoutingSettings {
     double bus_velocity;
 };
 
-class Router {
+class TransportRouter {
 public:
-    Router() = default;
+    TransportRouter() = default;
 
-    Router(const RoutingSettings& settings)
-        : routing_settings_(settings) {};
+    TransportRouter(transport_catalogue::TransportCatalogue& catalogue, const RoutingSettings routing_settings)
+        : catalogue_(catalogue)
+        , routing_settings_(routing_settings)
+        , transport_graph_(graph::DirectedWeightedGraph<double>(catalogue_.GetStopsCount()))
+        , transport_router_(transport_graph_) {
+    };
 
-    void SetSettings(const RoutingSettings& settings);
+    void SetSettings(const RoutingSettings& settings) {
+        routing_settings_ = settings;
+        //transport_graph_ = graph::DirectedWeightedGraph<double>(catalogue_.GetStopsCount());
+        //FillGraphs(catalogue_, transport_graph_);
+        //transport_router_ = graph::Router<double>(transport_graph_);
+    }
 
     int GetBusWaitTime() const {
         return routing_settings_.bus_wait_time;
@@ -25,14 +34,17 @@ public:
 
     double GetBusVelocity() const {
         return routing_settings_.bus_velocity;
-    }
- 
-    void FillGraphs(transport_catalogue::TransportCatalogue& catalogue, graph::DirectedWeightedGraph<double>& graph);
+    }   
 
-    void BuildRoute();
+    std::optional<graph::Router<double>::RouteInfo> FindRoute(graph::VertexId from, graph::VertexId to);
 
 private:
+    void FillGraphs(transport_catalogue::TransportCatalogue& catalogue, graph::DirectedWeightedGraph<double>& graph);
+
+    transport_catalogue::TransportCatalogue& catalogue_;
     RoutingSettings routing_settings_;
+    graph::DirectedWeightedGraph<double> transport_graph_;
+    graph::Router<double> transport_router_;
 };
 
 };

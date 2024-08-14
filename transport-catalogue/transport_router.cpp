@@ -6,11 +6,7 @@ namespace transport_router {
 const int MIN_IN_HOUR = 60;
 const int METERS_IN_KM = 1000;
 
-void Router::SetSettings(const RoutingSettings& settings) {
-    routing_settings_ = settings;
-}
-
-void Router::FillGraphs(transport_catalogue::TransportCatalogue& catalogue, graph::DirectedWeightedGraph<double>& graph) {
+void TransportRouter::FillGraphs(transport_catalogue::TransportCatalogue& catalogue, graph::DirectedWeightedGraph<double>& graph) {
     for(const auto& bus : catalogue.GetBuses()) {
         const auto& stops = bus.stops_;
         double weight = routing_settings_.bus_wait_time * 1.0;
