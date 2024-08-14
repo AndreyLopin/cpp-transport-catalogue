@@ -16,7 +16,7 @@ namespace transport_catalogue {
 namespace input {
 
 JsonReader::JsonReader(TransportCatalogue& catalogue, map_renderer::MapRenderer& renderer, 
-        transport_router::Router& router)
+        transport_router::TransportRouter& router)
     : catalogue_(catalogue)
     , renderer_(renderer)
     , router_(router) {

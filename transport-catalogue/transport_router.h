@@ -10,11 +10,13 @@ struct RoutingSettings {
     double bus_velocity;
 };
 
-class Router {
+class TransportRouter {
 public:
-    Router() = default;
+    TransportRouter() = default;
 
-    Router(const RoutingSettings& settings)
+    //Отсюда должно вызываться построение графа, которое должно быть частью роутера. 
+    //FillGraphs должен быть приватным методом
+    TransportRouter(const RoutingSettings& settings)
         : routing_settings_(settings) {};
 
     void SetSettings(const RoutingSettings& settings);
@@ -29,7 +31,9 @@ public:
  
     void FillGraphs(transport_catalogue::TransportCatalogue& catalogue, graph::DirectedWeightedGraph<double>& graph);
 
-    void BuildRoute();
+    //Данный метод должен осуществлять поиск на графе, используя исходный роутер и принимать на входе две остановки
+    //и возвращать данные пути. Ну и это скорее FindRoute, впрочем  - у вас он даже не реализован
+    void FindRoute();
 
 private:
     RoutingSettings routing_settings_;
