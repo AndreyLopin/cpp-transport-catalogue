@@ -213,23 +213,22 @@ json::Node JsonReader::PrintRoute(const json::Node& request, transport_router::T
         const auto route = router.FindRoute(from, to);
         
         if (route.has_value()) {
-            const auto& elem = route.value().edges;
+            const auto& elem = route.value().route_points;
             json::Array items;
             for (const auto& el : elem) {
-                const auto& edge = router.GetGraph().GetEdge(el);
                 items.push_back(json::Builder().StartDict()
                     .Key("time").Value(router.GetBusWaitTime())
                     .Key("type").Value("Wait")
-                    .Key("stop_name").Value(catalogue_.GetAllStops()[edge.from].name)
+                    .Key("stop_name").Value(el.from->name)
                     .EndDict().Build());
                 items.push_back(json::Builder().StartDict()
-                    .Key("time"s).Value(edge.weight - router.GetBusWaitTime())
-                    .Key("span_count"s).Value(static_cast<int>(edge.span_count))
-                    .Key("bus"s).Value(edge.bus)
+                    .Key("time"s).Value(el.wait_time)
+                    .Key("span_count"s).Value(el.span_count)
+                    .Key("bus"s).Value(el.bus)
                     .Key("type"s).Value("Bus"s)
                     .EndDict().Build());
             }
-            answer.Key("total_time"s).Value(route.value().weight)
+            answer.Key("total_time"s).Value(route.value().duration)
                 .Key("request_id"s).Value(request.AsDict().at("id").AsInt())
                 .Key("items"s).Value(items);
         } else {

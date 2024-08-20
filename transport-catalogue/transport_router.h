@@ -10,8 +10,17 @@ struct RoutingSettings {
     double bus_velocity;
 };
 
-struct Routing {
+struct RoutePoint {
+    domain::Stop* from;
+    int span_count;
+    std::string bus;
+    double wait_time;
+};
 
+struct RequestRouteInfo {
+    double duration;
+
+    std::vector<RoutePoint> route_points;
 };
 
 class TransportRouter {
@@ -39,7 +48,7 @@ public:
         return routing_settings_.bus_velocity;
     }
 
-    std::optional<graph::Router<double>::RouteInfo> FindRoute(domain::Stop* from, domain::Stop* to);
+    std::optional<transport_router::RequestRouteInfo> FindRoute(domain::Stop* from, domain::Stop* to);
 
 private:
     RoutingSettings routing_settings_;

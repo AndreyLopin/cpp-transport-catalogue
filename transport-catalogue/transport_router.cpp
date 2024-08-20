@@ -52,8 +52,24 @@ void TransportRouter::FillGraphs(transport_catalogue::TransportCatalogue& catalo
     }
 }
 
-std::optional<graph::Router<double>::RouteInfo> TransportRouter::FindRoute(domain::Stop* from, domain::Stop* to) {
-    return router_.graph::Router<double>::BuildRoute(from->id, to->id);
+std::optional<RequestRouteInfo> TransportRouter::FindRoute(domain::Stop* from, domain::Stop* to) {
+    const auto route_info = router_.graph::Router<double>::BuildRoute(from->id, to->id);
+    if(route_info.has_value()) {
+        std::vector<RoutePoint> route_points;
+
+        const auto& elem = route_info.value().edges;
+
+        for (const auto& el : elem) {
+            const auto& edge = router_.GetGraph().GetEdge(el);
+            route_points.emplace_back(RoutePoint{catalogue_.FindStop(catalogue_.GetAllStops()[edge.from].name),
+                                            static_cast<int>(edge.span_count),
+                                            edge.bus,
+                                            edge.weight - GetBusWaitTime()});            
+        }
+        return RequestRouteInfo{route_info.value().weight, route_points};
+    } else {
+        return std::nullopt;
+    }
 }
 
 const graph::DirectedWeightedGraph<double>& TransportRouter::GetGraph() const {
