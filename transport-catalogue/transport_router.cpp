@@ -6,11 +6,7 @@ namespace transport_router {
 const int MIN_IN_HOUR = 60;
 const int METERS_IN_KM = 1000;
 
-void TransportRouter::SetSettings(const RoutingSettings& settings) {
-    routing_settings_ = settings;
-}
-
-void TransportRouter::FillGraphs(transport_catalogue::TransportCatalogue& catalogue, graph::DirectedWeightedGraph<double>& graph) {
+void TransportRouter::FillGraphs(transport_catalogue::TransportCatalogue& catalogue) {
     for(const auto& bus : catalogue.GetBuses()) {
         const auto& stops = bus.stops_;
         double weight = routing_settings_.bus_wait_time * 1.0;
@@ -29,7 +25,7 @@ void TransportRouter::FillGraphs(transport_catalogue::TransportCatalogue& catalo
 
                         weight += (it->second * MIN_IN_HOUR) / (METERS_IN_KM * routing_settings_.bus_velocity);
                         graph::Edge edge(stops[i]->id, stops[j]->id, span, bus.name_, weight);
-                        graph.AddEdge(edge);
+                        graph_.AddEdge(edge);
                         ++span;
                     }
                 }
@@ -47,7 +43,7 @@ void TransportRouter::FillGraphs(transport_catalogue::TransportCatalogue& catalo
 
                             weight += (it->second * MIN_IN_HOUR) / (METERS_IN_KM * routing_settings_.bus_velocity);
                             graph::Edge edge(stops[x]->id, stops[t - 1]->id, span, bus.name_, weight);
-                            graph.AddEdge(edge);
+                            graph_.AddEdge(edge);
                             ++span;
                         }
                     }
@@ -55,6 +51,14 @@ void TransportRouter::FillGraphs(transport_catalogue::TransportCatalogue& catalo
             }
         }
     }
+}
+
+std::optional<graph::Router<double>::RouteInfo> TransportRouter::FindRoute(graph::VertexId from, graph::VertexId to) {
+    return router_.graph::Router<double>::BuildRoute(from, to);
+}
+
+const graph::DirectedWeightedGraph<double>& TransportRouter::GetGraph() const {
+    return graph_;
 }
 
 };

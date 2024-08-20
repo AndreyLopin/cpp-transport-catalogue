@@ -16,7 +16,7 @@ namespace input {
 
 class JsonReader {
 public:
-    JsonReader(TransportCatalogue& catalogue, map_renderer::MapRenderer& renderer, transport_router::TransportRouter& router);
+    JsonReader(TransportCatalogue& catalogue, map_renderer::MapRenderer& renderer/*, transport_router::TransportRouter& router*/);
 
     map_renderer::RenderSettings GetRenderSettings(void);
 
@@ -50,11 +50,11 @@ private:
     json::Node PrintMap(const json::Node& request);
     json::Node PrintBusInfo(const json::Node& request);
     json::Node PrintStopInfo(const json::Node& request);
-    json::Node PrintRoute(const json::Node& request, graph::Router<double> transport_router);
+    json::Node PrintRoute(const json::Node& request, transport_router::TransportRouter& router);
 
     TransportCatalogue& catalogue_;
     map_renderer::MapRenderer& renderer_;
-    transport_router::TransportRouter& router_;
+    //transport_router::TransportRouter& router_;
 
     json::Array base_requests_;
     json::Array stat_requests_;

@@ -32,6 +32,17 @@ public:
     const Graph& GetGraph() const {
         return graph_;
     }
+
+    void Initialize() {
+        routes_internal_data_ = RoutesInternalData{graph_.GetVertexCount(), std::vector<std::optional<RouteInternalData>>(graph_.GetVertexCount())};
+        InitializeRoutesInternalData(graph_);
+
+        const size_t vertex_count = graph_.GetVertexCount();
+        for (VertexId vertex_through = 0; vertex_through < vertex_count; ++vertex_through) {
+            RelaxRoutesInternalDataThroughVertex(vertex_count, vertex_through);
+        }
+    }
+
 private:
     struct RouteInternalData {
         Weight weight;

@@ -15,16 +15,15 @@
 namespace transport_catalogue {
 namespace input {
 
-JsonReader::JsonReader(TransportCatalogue& catalogue, map_renderer::MapRenderer& renderer, 
-        transport_router::TransportRouter& router)
+JsonReader::JsonReader(TransportCatalogue& catalogue, map_renderer::MapRenderer& renderer/*, transport_router::TransportRouter& router*/)
     : catalogue_(catalogue)
     , renderer_(renderer)
-    , router_(router) {
+    /*, router_(router)*/ {
 }
 
 void JsonReader::ApplyCommands(void) {
     renderer_.SetSettings(GetRenderSettings());
-    router_.SetSettings(GetRoutingSettings());
+    //router_.SetSettings(GetRoutingSettings());
     AddStops();
     AddDistances();
     AddBuses();
@@ -34,9 +33,7 @@ void JsonReader::AnswersRequests(std::ostream& out) {
     json::Array doc;
     std::stringstream output;
 
-    graph::DirectedWeightedGraph<double> transport_graph(catalogue_.GetStopsCount());
-    router_.FillGraphs(catalogue_, transport_graph);
-    graph::Router transport_router(transport_graph);
+    transport_router::TransportRouter router_(GetRoutingSettings(), catalogue_);
 
     for(auto& el : stat_requests_) {
         if(el.AsDict().at("type").AsString() == "Map") {
@@ -52,7 +49,7 @@ void JsonReader::AnswersRequests(std::ostream& out) {
         }
 
         if(el.AsDict().at("type").AsString() == "Route") {
-            doc.emplace_back(PrintRoute(el, transport_router));
+            doc.emplace_back(PrintRoute(el, router_));
         }
     }
     
@@ -197,7 +194,7 @@ json::Node JsonReader::PrintStopInfo(const json::Node& request) {
     return answer.EndDict().Build();
 }
 
-json::Node JsonReader::PrintRoute(const json::Node& request, graph::Router<double> transport_router) {
+json::Node JsonReader::PrintRoute(const json::Node& request, transport_router::TransportRouter& router) {
     using namespace std::string_literals;
 
     json::Builder answer = json::Builder{};
@@ -213,20 +210,20 @@ json::Node JsonReader::PrintRoute(const json::Node& request, graph::Router<doubl
             .StartArray()
             .EndArray();
     } else {
-        const auto route = transport_router.graph::Router<double>::BuildRoute(from->id, to->id);
+        const auto route = router.FindRoute(from->id, to->id);
         
         if (route.has_value()) {
             const auto& elem = route.value().edges;
             json::Array items;
             for (const auto& el : elem) {
-                const auto& edge = transport_router.GetGraph().GetEdge(el);
+                const auto& edge = router.GetGraph().GetEdge(el);
                 items.push_back(json::Builder().StartDict()
-                    .Key("time").Value(router_.GetBusWaitTime())
+                    .Key("time").Value(router.GetBusWaitTime())
                     .Key("type").Value("Wait")
                     .Key("stop_name").Value(catalogue_.GetAllStops()[edge.from].name)
                     .EndDict().Build());
                 items.push_back(json::Builder().StartDict()
-                    .Key("time"s).Value(edge.weight - router_.GetBusWaitTime())
+                    .Key("time"s).Value(edge.weight - router.GetBusWaitTime())
                     .Key("span_count"s).Value(static_cast<int>(edge.span_count))
                     .Key("bus"s).Value(edge.bus)
                     .Key("type"s).Value("Bus"s)
