@@ -52,8 +52,8 @@ void TransportRouter::FillGraphs(transport_catalogue::TransportCatalogue& catalo
     }
 }
 
-std::optional<graph::Router<double>::RouteInfo> TransportRouter::FindRoute(graph::VertexId from, graph::VertexId to) {
-    return router_.graph::Router<double>::BuildRoute(from, to);
+std::optional<graph::Router<double>::RouteInfo> TransportRouter::FindRoute(domain::Stop* from, domain::Stop* to) {
+    return router_.graph::Router<double>::BuildRoute(from->id, to->id);
 }
 
 const graph::DirectedWeightedGraph<double>& TransportRouter::GetGraph() const {

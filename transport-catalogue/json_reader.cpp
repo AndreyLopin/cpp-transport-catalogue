@@ -210,7 +210,7 @@ json::Node JsonReader::PrintRoute(const json::Node& request, transport_router::T
             .StartArray()
             .EndArray();
     } else {
-        const auto route = router.FindRoute(from->id, to->id);
+        const auto route = router.FindRoute(from, to);
         
         if (route.has_value()) {
             const auto& elem = route.value().edges;
