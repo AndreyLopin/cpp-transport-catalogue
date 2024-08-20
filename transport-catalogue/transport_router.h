@@ -14,8 +14,6 @@ class TransportRouter {
 public:
     TransportRouter() = default;
 
-    //Отсюда должно вызываться построение графа, которое должно быть частью роутера.
-    //FillGraphs должен быть приватным методом
     TransportRouter(const RoutingSettings settings, transport_catalogue::TransportCatalogue& catalogue)
         : routing_settings_(settings)
         , graph_(graph::DirectedWeightedGraph<double>(catalogue.GetStopsCount()))
@@ -38,8 +36,6 @@ public:
  
     void FillGraphs(transport_catalogue::TransportCatalogue& catalogue);
 
-    //Данный метод должен осуществлять поиск на графе, используя исходный роутер и принимать на входе две остановки
-    //и возвращать данные пути. Ну и это скорее FindRoute, впрочем  - у вас он даже не реализован
     std::optional<graph::Router<double>::RouteInfo> FindRoute(graph::VertexId from, graph::VertexId to);
 
     const graph::DirectedWeightedGraph<double>& GetGraph() const;
@@ -47,7 +43,7 @@ public:
 private:
     RoutingSettings routing_settings_;
     graph::DirectedWeightedGraph<double> graph_;
-    graph::Router<double> router_;// = graph::Router(graph_);
+    graph::Router<double> router_;
 };
 
 };
